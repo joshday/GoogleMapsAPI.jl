@@ -1,0 +1,11 @@
+*.jl.*.cov
+*.jl.cov
+*.jl.mem
+/Manifest.toml
+/test/Manifest.toml
+/docs/build/
+/docs/site/
+.DS_Store
+.vscode/
+.idea/
+*.claude
