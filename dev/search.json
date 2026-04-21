@@ -169,7 +169,7 @@
     "href": "pages/types.html",
     "title": "Types & extractors",
     "section": "",
-    "text": "The wrapper types\nEvery GoogleMapsAPI response is a raw JSON object (JSON.Object) — great for exploratory access via dot notation, but awkward to hand to the wider geospatial ecosystem.\nGoogleMapsAPI.jl ships four lightweight wrapper types plus a set of extractor functions that normalise any response shape into the same structure.\nusing GoogleMapsAPI\n\n\nPrecompiling packages...\n   2015.2 ms  ✓ QuartoNotebookWorkerJSONExt (serial)\n  1 dependency successfully precompiled in 2 seconds",
+    "text": "The wrapper types\nEvery GoogleMapsAPI response is a raw JSON object (JSON.Object) — great for exploratory access via dot notation, but awkward to hand to the wider geospatial ecosystem.\nGoogleMapsAPI.jl ships four lightweight wrapper types plus a set of extractor functions that normalise any response shape into the same structure.\nusing GoogleMapsAPI\n\n\nPrecompiling packages...\n   1972.2 ms  ✓ QuartoNotebookWorkerJSONExt (serial)\n  1 dependency successfully precompiled in 2 seconds",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
