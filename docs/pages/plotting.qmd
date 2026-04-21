@@ -13,30 +13,51 @@ GoogleMapsAPI.jl ships two plotting paths:
    `GMLineString`, `GMFeature`, `GMFeatureCollection`) implement the
    GeoInterface traits, so **any** GeoInterface-aware plotting tool
    (notably [GeoMakie.jl](https://geo.makie.org)) can consume GoogleMapsAPI
-   responses directly — with real projections, base maps, legends, and all
-   the usual Makie layout machinery.
+   responses directly — with real projections, base maps, and the usual
+   Makie layout machinery.
+
+::: {.callout-note}
+The examples on this page make real calls to the Google Maps Platform.
+Set `ENV["GOOGLE_MAPS_API_KEY"]` (or pass `key=...` to each call) before
+rendering the page locally.
+:::
+
+```{julia}
+#| output: false
+using GoogleMapsAPI
+using CairoMakie, FileIO, Makie
+CairoMakie.activate!(type = "png")
+```
 
 ## The built-in `mapplot`
 
 Load Makie (plus a backend and `FileIO`) alongside GoogleMapsAPI, and
-`mapplot(x)` will fetch a static map sized to the response's bounding box
-and overlay everything it can extract.
+`mapplot(x)` fetches a static map sized to the response's bounding box and
+overlays everything it can extract.
 
-```julia
-using GoogleMapsAPI
-using CairoMakie, FileIO, Makie
+### A geocoded address
 
+```{julia}
 r = geocode("1600 Amphitheatre Pkwy, Mountain View, CA")
 mapplot(r)
+```
 
+### A computed route, on satellite imagery
+
+```{julia}
 route = compute_routes(
-    (35.9132, -79.0822), (38.9805, -77.0915);
+    (35.9132, -79.0822),            # Carrboro, NC
+    (38.9805, -77.0915);            # Bethesda, MD
     routing_preference = "TRAFFIC_AWARE_OPTIMAL",
 )
 mapplot(route; maptype = "satellite", size = (800, 600))
+```
 
+### Elevation samples along a transect
+
+```{julia}
 elevations = elevation([(38.5, -120.2), (40.7, -120.95), (43.25, -126.45)])
-mapplot(elevations)
+mapplot(elevations; maptype = "terrain")
 ```
 
 ### Styling kwargs
@@ -77,30 +98,23 @@ native geometries.
 
 ### Traits
 
-```julia
-using GoogleMapsAPI, GeoInterface
+```{julia}
+using GeoInterface
 
 p = GMPoint(37.4, -122.1)
-GeoInterface.isgeometry(p)        # true
-GeoInterface.geomtrait(p)         # PointTrait()
-GeoInterface.x(p)                 # -122.1  (longitude, GeoInterface convention)
-GeoInterface.y(p)                 # 37.4    (latitude)
-GeoInterface.ncoord(p)            # 2
+GeoInterface.isgeometry(p), GeoInterface.geomtrait(p),
+GeoInterface.x(p), GeoInterface.y(p)
 ```
 
-```julia
+```{julia}
 ls = GMLineString([GMPoint(0.0, 0.0), GMPoint(1.0, 2.0), GMPoint(3.0, 4.0)])
-GeoInterface.geomtrait(ls)        # LineStringTrait()
-GeoInterface.ngeom(ls)            # 3
-GeoInterface.getgeom(ls, 2)       # GMPoint(1.0, 2.0)
+GeoInterface.geomtrait(ls), GeoInterface.ngeom(ls), GeoInterface.getgeom(ls, 2)
 ```
 
-```julia
-fc = features(geocode("..."))
-GeoInterface.isfeaturecollection(fc)           # true
+```{julia}
+fc = features(geocode("Carrboro, NC"))
 f  = GeoInterface.getfeature(fc, 1)
-GeoInterface.geometry(f)                       # GMPoint(...)
-GeoInterface.properties(f).formatted_address   # "..."
+(GeoInterface.geometry(f), GeoInterface.properties(f).formatted_address)
 ```
 
 ### What this unlocks
@@ -123,75 +137,88 @@ accepts GoogleMapsAPI responses — including:
 
 GeoMakie plots lat/lng data on a `GeoAxis` that handles projections.
 Because `GMPoint` implements `PointTrait`, you can pull points out of any
-response and hand them straight to Makie — and with a small shim, hand the
-wrappers themselves to GeoMakie.
+response and hand them straight to Makie.
 
-### Scatter: extract points, plot directly
+```{julia}
+#| output: false
+using GeoMakie
+```
 
-```julia
-using GoogleMapsAPI, GeoMakie, GLMakie
+### Scatter: extract points, plot on a projected axis
 
-fig = Figure(size = (900, 600))
-ax = GeoAxis(fig[1, 1]; dest = "+proj=natearth")
-
-# Any call that returns points — geocode, places_nearby, snap_to_roads, …
-r  = places("coffee"; location = (37.7749, -122.4194), radius = 2000)
+```{julia}
+r = places("coffee"; location = (37.7749, -122.4194), radius = 2000)
 pts = points(r)
-lons = [GeoInterface.x(p) for p in pts]
-lats = [GeoInterface.y(p) for p in pts]
 
-scatter!(ax, lons, lats; color = :red, markersize = 10)
-
-save("coffee.png", fig)
+fig = Figure(size = (800, 500))
+ax  = GeoAxis(fig[1, 1]; dest = "+proj=natearth",
+              xticks = -180:30:180, yticks = -90:30:90)
+lines!(ax, GeoMakie.coastlines(); color = :grey70, linewidth = 0.5)
+scatter!(ax,
+    [GeoInterface.x(p) for p in pts],
+    [GeoInterface.y(p) for p in pts];
+    color = :crimson, markersize = 10, strokecolor = :white, strokewidth = 1,
+)
+xlims!(ax, -123, -122)
+ylims!(ax, 37.5, 38.0)
+fig
 ```
 
 ### Routes: lines on a projected axis
 
-```julia
-using GoogleMapsAPI, GeoMakie, GLMakie, GeoInterface
+```{julia}
+route = compute_routes((35.9132, -79.0822), (38.9805, -77.0915))
 
-fig = Figure(size = (900, 600))
-ax  = GeoAxis(fig[1, 1]; dest = "+proj=wintri")
-
-route = compute_routes(
-    (35.9132, -79.0822),            # Carrboro, NC
-    (38.9805, -77.0915);            # Bethesda, MD
-)
-
+fig = Figure(size = (800, 500))
+ax  = GeoAxis(fig[1, 1]; dest = "+proj=natearth",
+              xticks = -180:5:180, yticks = -90:5:90)
+lines!(ax, GeoMakie.coastlines(); color = :grey70, linewidth = 0.5)
 for ls in linestrings(route)
-    lons = [GeoInterface.x(pt) for pt in ls]
-    lats = [GeoInterface.y(pt) for pt in ls]
-    lines!(ax, lons, lats; color = :dodgerblue, linewidth = 3)
+    lines!(ax,
+        [GeoInterface.x(pt) for pt in ls],
+        [GeoInterface.y(pt) for pt in ls];
+        color = :dodgerblue, linewidth = 3,
+    )
 end
-
-save("route.png", fig)
+xlims!(ax, -81, -76)
+ylims!(ax, 35, 40)
+fig
 ```
 
 ### One function for anything
 
-If you want to treat a response generically — plotting every point or every
-line without caring about the endpoint — walk the feature collection:
+Treat a response generically — plot every point or every line without
+branching on which endpoint produced it — by walking the feature
+collection:
 
-```julia
-function geoplot!(ax, x)
+```{julia}
+function geoplot!(ax, x; kwargs...)
     for f in features(x)
         g = GeoInterface.geometry(f)
         if g isa GMPoint
-            scatter!(ax, [GeoInterface.x(g)], [GeoInterface.y(g)])
+            scatter!(ax, [GeoInterface.x(g)], [GeoInterface.y(g)]; kwargs...)
         elseif g isa GMLineString
-            lons = [GeoInterface.x(pt) for pt in g]
-            lats = [GeoInterface.y(pt) for pt in g]
-            lines!(ax, lons, lats)
+            lines!(ax,
+                [GeoInterface.x(pt) for pt in g],
+                [GeoInterface.y(pt) for pt in g];
+                kwargs...,
+            )
         end
     end
     ax
 end
 
-fig = Figure()
-ax  = GeoAxis(fig[1, 1]; dest = "+proj=natearth")
-geoplot!(ax, geocode("San Francisco, CA"))
-geoplot!(ax, compute_routes((37.77, -122.42), (40.71, -74.01)))
-geoplot!(ax, elevation([(40, -120), (42, -122), (44, -124)]))
+fig = Figure(size = (800, 500))
+ax  = GeoAxis(fig[1, 1]; dest = "+proj=natearth",
+              xticks = -180:15:180, yticks = -90:15:90)
+lines!(ax, GeoMakie.coastlines(); color = :grey70, linewidth = 0.5)
+geoplot!(ax, geocode("San Francisco, CA"); color = :crimson, markersize = 14)
+geoplot!(ax, compute_routes((37.77, -122.42), (40.71, -74.01));
+             color = :dodgerblue, linewidth = 2)
+geoplot!(ax, elevation([(40, -120), (42, -122), (44, -124)]);
+             color = :orange, markersize = 10)
+xlims!(ax, -130, -65)
+ylims!(ax, 25, 50)
 fig
 ```
 
