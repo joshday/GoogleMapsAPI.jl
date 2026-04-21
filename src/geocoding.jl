@@ -2,7 +2,7 @@
 const GEOCODING_PATH = "/maps/api/geocode/json"
 
 """
-    geocode(address; kwargs...) -> JSON3.Object
+    geocode(address; kwargs...) -> JSON.Object
 
 Forward-geocode `address` via the Google Geocoding API.
 
@@ -39,7 +39,7 @@ function geocode(
 end
 
 """
-    reverse_geocode(lat, lon; kwargs...) -> JSON3.Object
+    reverse_geocode(lat, lon; kwargs...) -> JSON.Object
     reverse_geocode((lat, lon); kwargs...)
 
 Reverse-geocode a coordinate via the Google Geocoding API.

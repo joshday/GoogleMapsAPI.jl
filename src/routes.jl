@@ -6,7 +6,7 @@ const ROUTES_DEFAULT_FIELDS = "routes.duration,routes.staticDuration,routes.dist
 const ROUTE_MATRIX_DEFAULT_FIELDS = "originIndex,destinationIndex,duration,staticDuration,distanceMeters,status,condition"
 
 """
-    compute_routes(origin, destination; kwargs...) -> JSON3.Object
+    compute_routes(origin, destination; kwargs...) -> JSON.Object
 
 Call the Google Routes API `v2:computeRoutes` endpoint.
 
@@ -92,7 +92,7 @@ function _compute_routes_body(
 end
 
 """
-    compute_route_matrix(origins, destinations; kwargs...) -> JSON3.Array
+    compute_route_matrix(origins, destinations; kwargs...) -> JSON.Array
 
 Call the Google Routes API `v2:computeRouteMatrix` endpoint.
 

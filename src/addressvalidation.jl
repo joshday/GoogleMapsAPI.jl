@@ -3,7 +3,7 @@ const ADDRESS_VALIDATION_BASE_URL = "https://addressvalidation.googleapis.com"
 
 """
     addressvalidation(address_lines; region_code=nothing, locality=nothing,
-                      enable_usps_cass=false, ...) -> JSON3.Object
+                      enable_usps_cass=false, ...) -> JSON.Object
 
 Validate a postal address. `address_lines` is a string (wrapped to a
 one-element vector) or a vector of address-line strings. `enable_usps_cass`
@@ -37,4 +37,4 @@ end
 
 # Address Validation uses the AIP error envelope (no legacy `status` field),
 # so the caller inspects `body.result` / `body.error` directly.
-_addressvalidation_extract(resp) = JSON3.read(resp.body)
+_addressvalidation_extract(resp) = JSON.parse(resp.body)

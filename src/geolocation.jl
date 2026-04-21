@@ -3,7 +3,7 @@ const GEOLOCATION_BASE_URL = "https://www.googleapis.com"
 const GEOLOCATION_PATH = "/geolocation/v1/geolocate"
 
 """
-    geolocate(; kwargs...) -> JSON3.Object
+    geolocate(; kwargs...) -> JSON.Object
 
 Locate a device from cell-tower / WiFi data. POST to
 `https://www.googleapis.com/geolocation/v1/geolocate`.
@@ -50,7 +50,7 @@ end
 # Geolocation returns 404 "notFound" as a valid body (not an error), and uses
 # AIP-style `error.errors[].reason` rather than the legacy `status` envelope.
 function _geolocation_extract(resp)
-    body = JSON3.read(resp.body)
+    body = JSON.parse(resp.body)
     (resp.status == 200 || resp.status == 404) && return body
     # Best-effort reason extraction — shape may vary on transport-level failures.
     err_reason = try

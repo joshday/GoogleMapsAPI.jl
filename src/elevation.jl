@@ -2,7 +2,7 @@
 const ELEVATION_PATH = "/maps/api/elevation/json"
 
 """
-    elevation(locations; kwargs...) -> JSON3.Array
+    elevation(locations; kwargs...) -> JSON.Array
 
 Provides elevation data for `locations`, a single location or a list of
 lat/lng values (tuples, named tuples, dicts).
@@ -23,7 +23,7 @@ function elevation(
 end
 
 """
-    elevation_along_path(path, samples; kwargs...) -> JSON3.Array
+    elevation_along_path(path, samples; kwargs...) -> JSON.Array
 
 Provides elevation data sampled along `path`. `path` may be an encoded
 polyline string (prepended with `"enc:"` internally) or a list of lat/lng

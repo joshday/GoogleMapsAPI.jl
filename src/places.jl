@@ -3,7 +3,7 @@
 const _PLACES_LOCATION_BIAS_PREFIXES = ("ipbias", "point", "circle", "rectangle")
 
 """
-    find_place(input, input_type; fields=nothing, location_bias=nothing, language=nothing, kwargs...) -> JSON3.Object
+    find_place(input, input_type; fields=nothing, location_bias=nothing, language=nothing, kwargs...) -> JSON.Object
 
 Find a place by text input. `input_type` must be `"textquery"` or
 `"phonenumber"`.
@@ -34,7 +34,7 @@ function find_place(input::AbstractString, input_type::AbstractString;
 end
 
 """
-    places(; query=nothing, location=nothing, radius=nothing, ...) -> JSON3.Object
+    places(; query=nothing, location=nothing, radius=nothing, ...) -> JSON.Object
 
 Text-search for places.
 """
@@ -57,7 +57,7 @@ function places(query::Union{Nothing,AbstractString} = nothing;
 end
 
 """
-    places_nearby(; location=nothing, radius=nothing, ...) -> JSON3.Object
+    places_nearby(; location=nothing, radius=nothing, ...) -> JSON.Object
 
 Nearby-search for places. Either `location` or `page_token` is required.
 """
@@ -112,7 +112,7 @@ function _places_search(c::GoogleMapsClient, url_part::AbstractString;
 end
 
 """
-    place(place_id; fields=nothing, language=nothing, ...) -> JSON3.Object
+    place(place_id; fields=nothing, language=nothing, ...) -> JSON.Object
 
 Detailed info for a single place by place_id.
 """

@@ -1,0 +1,46 @@
+---
+title: "GoogleMapsAPI.jl"
+---
+
+A Julia wrapper for the [Google Maps Platform](https://developers.google.com/maps)
+web APIs with feature parity to the official
+[`googlemaps`](https://github.com/googlemaps/google-maps-services-python) Python
+client — plus **typed wrapper outputs** that play nicely with
+[GeoInterface.jl](https://github.com/JuliaGeo/GeoInterface.jl) and a
+[Makie](https://docs.makie.org) plotting extension.
+
+## What's covered
+
+- **Routes API** — `compute_routes`, `compute_route_matrix`
+- **Geocoding API** — `geocode`, `reverse_geocode`
+- **Elevation API** — `elevation`, `elevation_along_path`
+- **Geolocation API** — `geolocate`
+- **Time Zone API** — `timezone`
+- **Roads API** — `snap_to_roads`, `nearest_roads`, `speed_limits`, `snapped_speed_limits`
+- **Places API** (legacy) — `find_place`, `places`, `places_nearby`, `place`,
+  `places_photo`, `places_autocomplete`, `places_autocomplete_query`
+- **Maps Static API** — `static_map`
+- **Address Validation API** — `addressvalidation`
+- **Polyline utilities** — `encode_polyline`, `decode_polyline`
+- **Typed wrappers** — `GMPoint`, `GMLineString`, `GMFeature`,
+  `GMFeatureCollection` with GeoInterface trait conformance
+- **`mapplot`** — Static-Maps background + scatter/line overlay for any
+  response (via the Makie extension)
+
+## Client infrastructure
+
+Mirrors the Python client: retry with jittered backoff on 5xx /
+`OVER_QUERY_LIMIT`, QPS/QPM rate limiting, HMAC-SHA1 URL signing for
+enterprise `client_id` / `client_secret` credentials, and the
+`X-Goog-Maps-Experience-ID` header.
+
+## Next steps
+
+- [Getting started](pages/getting-started.qmd) — install, authenticate, make a
+  first call.
+- [Plotting](pages/plotting.qmd) — `mapplot`, plus GeoInterface/GeoMakie
+  integration.
+- [Types](pages/types.qmd) — `GMPoint`, `GMLineString`, `GMFeature`,
+  `GMFeatureCollection`, and the extractor functions that normalise any
+  response.
+- [API](pages/api.qmd) — every exported name with its docstring.

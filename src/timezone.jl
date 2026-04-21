@@ -2,7 +2,7 @@
 const TIMEZONE_PATH = "/maps/api/timezone/json"
 
 """
-    timezone(location; timestamp=nothing, language=nothing, kwargs...) -> JSON3.Object
+    timezone(location; timestamp=nothing, language=nothing, kwargs...) -> JSON.Object
 
 Get time-zone and UTC-offset info for `location` at `timestamp`.
 `location` may be any form accepted by the `convert.latlng` helper.

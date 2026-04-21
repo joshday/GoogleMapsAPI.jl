@@ -6,6 +6,7 @@ using Test
     include("test_exceptions.jl")
     include("test_convert.jl")
     include("test_polyline.jl")
+    include("test_types.jl")
     include("test_signing.jl")
     include("test_client.jl")
     include("test_routes.jl")

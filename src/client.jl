@@ -203,7 +203,7 @@ function _request(
     end
     isnothing(json_body) || push!(headers, "Content-Type" => "application/json")
 
-    body_bytes = isnothing(json_body) ? UInt8[] : Vector{UInt8}(JSON3.write(json_body))
+    body_bytes = isnothing(json_body) ? UInt8[] : Vector{UInt8}(JSON.json(json_body))
 
     resp = try
         c.transport(method, url;
@@ -291,7 +291,7 @@ function _default_extract(resp)
     if resp.status != 200
         throw(HTTPError(resp.status))
     end
-    body = JSON3.read(resp.body)
+    body = JSON.parse(resp.body)
     status = _body_status(body)
     isnothing(status) && return body
     if status == "OK" || status == "ZERO_RESULTS"

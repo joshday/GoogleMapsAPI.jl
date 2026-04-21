@@ -177,6 +177,67 @@ r = addressvalidation(["1600 Amphitheatre Pkwy", "Mountain View, CA 94043"];
 r.result.address.formattedAddress
 ```
 
+## Wrapper types and GeoInterface
+
+Every API response can be normalised into `GoogleMapsAPI.GMFeatureCollection`
+— a lightweight wrapper over the raw JSON that exposes a typed geometry
+(`GMPoint`, `GMLineString`, or `nothing`) plus the original object as
+`properties`:
+
+```julia
+r = geocode("1600 Amphitheatre Pkwy, Mountain View, CA")
+
+fc = features(r)                # GMFeatureCollection
+fc[1].geometry                  # GMPoint(lat=37.4, lng=-122.08...)
+fc[1].properties.formatted_address
+
+points(r)                       # Vector{GMPoint}
+linestrings(compute_routes(...))  # Vector{GMLineString}
+geometries(r)                   # Vector{GMPoint | GMLineString}
+```
+
+With `GeoInterface` loaded, `GMPoint`, `GMLineString`, `GMFeature`, and
+`GMFeatureCollection` implement the standard GeoInterface traits — so any
+GeoInterface-aware package (GeoMakie, GeoJSON, ArchGDAL, Shapefile, etc.)
+can consume GoogleMapsAPI responses directly:
+
+```julia
+using GoogleMapsAPI, GeoInterface
+
+p = points(geocode("Carrboro, NC"))[1]
+GeoInterface.x(p)   # longitude
+GeoInterface.y(p)   # latitude
+
+fc = features(compute_routes((35.9, -79.1), (38.9, -77.1)))
+GeoInterface.getgeom(GeoInterface.geometry(fc[1]), 1)   # first point of the route
+```
+
+## Plotting (Makie extension)
+
+With `Makie` (plus `FileIO` and a backend) loaded, any API response can be
+visualised on a Static Maps background:
+
+```julia
+using GoogleMapsAPI
+using Makie, FileIO, GLMakie   # or CairoMakie
+
+r = geocode("1600 Amphitheatre Pkwy, Mountain View, CA")
+mapplot(r; maptype = "satellite")
+
+route = compute_routes((35.9132, -79.0822), (38.9805, -77.0915))
+mapplot(route; maptype = "roadmap", size = (800, 600))
+
+elevations = elevation([(38.5, -120.2), (40.7, -120.95), (43.25, -126.45)])
+mapplot(elevations)
+```
+
+`mapplot` auto-extracts lat/lng points and encoded polylines from the response,
+frames the map, fetches the background via [`static_map`](@ref), and overlays
+markers (red, filled) for points and lines (dodger blue) for routes. Keyword
+arguments beyond `maptype`, `size`, `markercolor`, `markersize`, `linecolor`,
+`linewidth`, `padding` are forwarded to `static_map` (e.g. `scale`, `language`,
+`key`, `client`).
+
 ## Polyline utilities
 
 ```julia
@@ -197,7 +258,7 @@ The Routes API accepts multiple waypoint forms:
 
 ## Response format
 
-Responses are parsed with [JSON3](https://github.com/quinnj/JSON3.jl) —
+Responses are parsed with [JSON.jl](https://github.com/JuliaIO/JSON.jl) —
 navigate them with field access (`r.routes[1].duration`) or as a dict.
 
 ## Exceptions

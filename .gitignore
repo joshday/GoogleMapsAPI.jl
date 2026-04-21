@@ -5,6 +5,10 @@
 /test/Manifest.toml
 /docs/build/
 /docs/site/
+/docs/_site/
+/docs/_freeze/
+/docs/.quarto/
+/docs/Manifest.toml
 .DS_Store
 .vscode/
 .idea/

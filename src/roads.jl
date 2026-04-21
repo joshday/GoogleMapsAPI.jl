@@ -10,7 +10,7 @@ _roads_request(c::GoogleMapsClient, path::AbstractString; params) =
              extract_body = _roads_extract)
 
 """
-    snap_to_roads(path; interpolate=false, kwargs...) -> Vector (JSON3 array)
+    snap_to_roads(path; interpolate=false, kwargs...) -> Vector (JSON array)
 
 Snap a GPS path (up to 100 points) to the most likely roads travelled.
 """
@@ -54,7 +54,7 @@ function speed_limits(place_ids;
 end
 
 """
-    snapped_speed_limits(path; kwargs...) -> JSON3.Object
+    snapped_speed_limits(path; kwargs...) -> JSON.Object
 
 Snap `path` to roads and return the matched road segments with speed limits.
 Unlike `speed_limits`, returns the full body (both `speedLimits` and
@@ -73,7 +73,7 @@ end
 # rather than the legacy Maps `status` envelope, so `_default_extract` doesn't apply.
 function _roads_extract(resp)
     body = try
-        JSON3.read(resp.body)
+        JSON.parse(resp.body)
     catch
         resp.status == 200 || throw(HTTPError(resp.status))
         throw(ApiError("UNKNOWN_ERROR", "Received a malformed response."))

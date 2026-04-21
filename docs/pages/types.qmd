@@ -1,0 +1,128 @@
+---
+title: "Types & extractors"
+toc: true
+---
+
+Every GoogleMapsAPI response is a raw JSON object (`JSON.Object`) — great
+for exploratory access via dot notation, but awkward to hand to the wider
+geospatial ecosystem.
+
+GoogleMapsAPI.jl ships four lightweight wrapper types plus a set of extractor
+functions that normalise *any* response shape into the same structure.
+
+## The wrapper types
+
+```{julia}
+using GoogleMapsAPI
+```
+
+### `GMPoint`
+
+A single lat/lng pair.
+
+```{julia}
+p = GMPoint(37.4, -122.1)
+```
+
+### `GMLineString`
+
+An ordered sequence of `GMPoint`s — produced whenever a response carries an
+encoded polyline (e.g. a route from `compute_routes`).
+
+```{julia}
+ls = GMLineString([GMPoint(0.0, 0.0), GMPoint(1.0, 2.0), GMPoint(3.0, 4.0)])
+length(ls), collect(ls)
+```
+
+### `GMFeature`
+
+Geometry (a `GMPoint`, `GMLineString`, or `nothing`) paired with the raw
+response object that yielded it — so you keep access to fields like
+`formatted_address`, `placeId`, `name`, `elevation`, `duration`, etc.
+
+```{julia}
+f = GMFeature(p, (; formatted_address = "Mountain View, CA"))
+f.geometry, f.properties
+```
+
+### `GMFeatureCollection`
+
+Iterable container of `GMFeature`s with `length`, indexing, and iteration.
+
+```{julia}
+fc = GMFeatureCollection([f, GMFeature(nothing, (; note = "no geometry"))])
+length(fc), fc[1].geometry
+```
+
+## `features(response)` — normalise any response
+
+`features` walks any GoogleMapsAPI return value and produces a
+`GMFeatureCollection`. It handles:
+
+- `geocode` / `reverse_geocode` — `results[i].geometry.location` → points.
+- `compute_routes` — `routes[i].polyline.encodedPolyline` → linestrings.
+- `places`, `places_nearby`, `find_place` — `results`/`candidates[i].geometry.location`.
+- `place` — single `result.geometry.location`.
+- `places_autocomplete` — `predictions` (no geometry, just properties).
+- `elevation`, `snap_to_roads`, `nearest_roads` — bare arrays of
+  `{location, …}` objects.
+- `geolocate` — single `{location, accuracy}`.
+- Any object with an unrecognised shape is wrapped as a single-feature
+  collection with `nothing` geometry and the raw object as properties.
+
+```{julia}
+using JSON
+
+# Synthetic geocode-shaped response for illustration
+r = JSON.parse("""
+{
+    "status":"OK",
+    "results":[
+        {"geometry":{"location":{"lat":37.4,"lng":-122.1}},"formatted_address":"A"},
+        {"geometry":{"location":{"lat":40.0,"lng":-74.0}},"formatted_address":"B"}
+    ]
+}
+""")
+
+fc = features(r)
+```
+
+```{julia}
+fc[1].geometry
+```
+
+```{julia}
+fc[1].properties.formatted_address
+```
+
+## Convenience extractors
+
+For the common cases you don't need the full feature wrapper — just the
+points or the polylines.
+
+```{julia}
+points(r)
+```
+
+```{julia}
+route = JSON.parse("""{"routes":[{"polyline":{"encodedPolyline":"_p~iF~ps|U_ulLnnqC_mqNvxq`@"}}]}""")
+linestrings(route)
+```
+
+```{julia}
+geometries(r)
+```
+
+## Why wrappers?
+
+Three reasons:
+
+1. **Type stability.** `GMPoint` is a concrete struct — accessing `p.lat`
+   costs nothing. Walking into a `JSON.Object` hits dynamic dispatch.
+2. **GeoInterface.** These wrapper types implement
+   [GeoInterface.jl](https://github.com/JuliaGeo/GeoInterface.jl) traits, so
+   any GeoInterface-aware package (GeoMakie, GeoJSON, ArchGDAL, Shapefile,
+   GeometryOps, …) can consume GoogleMapsAPI responses directly. See
+   [Plotting](plotting.qmd).
+3. **Normalisation.** `features(x)` lets downstream code iterate uniformly
+   without branching on which endpoint produced `x`.
