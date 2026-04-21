@@ -14,6 +14,8 @@ jobs:
   backfill:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
     steps:
       - uses: actions/checkout@v6
         with:
