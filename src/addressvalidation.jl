@@ -22,8 +22,8 @@ function addressvalidation(
     lines = address_lines isa AbstractString ? [String(address_lines)] :
             [String(l) for l in address_lines]
     address = Dict{String,Any}("addressLines" => lines)
-    region_code === nothing || (address["regionCode"] = region_code)
-    locality    === nothing || (address["locality"]   = locality)
+    isnothing(region_code) || (address["regionCode"] = region_code)
+    isnothing(locality) || (address["locality"]   = locality)
     body = Dict{String,Any}("address" => address)
     enable_usps_cass && (body["enableUspsCass"] = true)
 

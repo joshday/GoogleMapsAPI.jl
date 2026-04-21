@@ -65,6 +65,8 @@ function compute_routes(
              extra_headers = ["X-Goog-FieldMask" => field_mask])
 end
 
+# Assemble the JSON body for `:computeRoutes`; factored out so tests can exercise body construction
+# without making an HTTP call.
 function _compute_routes_body(
     origin, destination;
     travel_mode, routing_preference, departure_time, arrival_time,

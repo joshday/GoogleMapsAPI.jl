@@ -1,4 +1,5 @@
 #-----------------------------------------------------------------------------# Maps Static API
+# Allowed values for the Static Map `format` and `maptype` query parameters; used for client-side validation.
 const _STATIC_MAP_IMAGE_FORMATS = ("png8", "png", "png32", "gif", "jpg", "jpg-baseline")
 const _STATIC_MAP_TYPES = ("roadmap", "satellite", "terrain", "hybrid")
 
@@ -29,32 +30,33 @@ function static_map(
     key::Union{Nothing,AbstractString} = nothing,
     timeout::Union{Nothing,Real} = nothing,
 )
-    if markers === nothing && (center === nothing || zoom === nothing)
+    if isnothing(markers) && (isnothing(center) || isnothing(zoom))
         throw(ArgumentError("static_map requires `markers=` or both `center=` and `zoom=`"))
     end
-    if format !== nothing && !(format in _STATIC_MAP_IMAGE_FORMATS)
+    if !isnothing(format) && !(format in _STATIC_MAP_IMAGE_FORMATS)
         throw(ArgumentError("invalid format '$format' (expected one of $(_STATIC_MAP_IMAGE_FORMATS))"))
     end
-    if maptype !== nothing && !(maptype in _STATIC_MAP_TYPES)
+    if !isnothing(maptype) && !(maptype in _STATIC_MAP_TYPES)
         throw(ArgumentError("invalid maptype '$maptype' (expected one of $(_STATIC_MAP_TYPES))"))
     end
 
     c = _client_from_kwargs(; client, key, timeout)
     params = Pair{String,Any}["size" => size_param(sz)]
-    center  === nothing || push!(params, "center"   => latlng(center))
-    zoom    === nothing || push!(params, "zoom"     => zoom)
-    scale   === nothing || push!(params, "scale"    => scale)
-    format  === nothing || push!(params, "format"   => format)
-    maptype === nothing || push!(params, "maptype"  => maptype)
-    language === nothing || push!(params, "language" => language)
-    region  === nothing || push!(params, "region"   => region)
-    markers === nothing || push!(params, "markers"  => _pipe_or_string(markers))
-    path    === nothing || push!(params, "path"     => _pipe_or_string(path))
-    visible === nothing || push!(params, "visible"  => location_list(visible))
-    style   === nothing || push!(params, "style"    => _pipe_or_string(style))
+    isnothing(center) || push!(params, "center"   => latlng(center))
+    isnothing(zoom) || push!(params, "zoom"     => zoom)
+    isnothing(scale) || push!(params, "scale"    => scale)
+    isnothing(format) || push!(params, "format"   => format)
+    isnothing(maptype) || push!(params, "maptype"  => maptype)
+    isnothing(language) || push!(params, "language" => language)
+    isnothing(region) || push!(params, "region"   => region)
+    isnothing(markers) || push!(params, "markers"  => _pipe_or_string(markers))
+    isnothing(path) || push!(params, "path"     => _pipe_or_string(path))
+    isnothing(visible) || push!(params, "visible"  => location_list(visible))
+    isnothing(style) || push!(params, "style"    => _pipe_or_string(style))
 
     _request(c, "/maps/api/staticmap"; params, extract_body = _bytes_extract)
 end
 
+# Accept a `markers=`/`path=`/`style=` value either as a pre-joined string or as a vector of pipe-parts.
 _pipe_or_string(s::AbstractString) = String(s)
 _pipe_or_string(v) = join_list("|", v)

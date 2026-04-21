@@ -18,7 +18,7 @@ function timezone(
     timeout::Union{Nothing,Real} = nothing,
 )
     c = _client_from_kwargs(; client, key, timeout)
-    ts = as_time(timestamp === nothing ? Base.time() : timestamp)
+    ts = as_time(something(timestamp, Base.time()))
     params = Pair{String,Any}["location" => latlng(location), "timestamp" => ts]
     isnothing(language) || push!(params, "language" => language)
     _request(c, TIMEZONE_PATH; params)

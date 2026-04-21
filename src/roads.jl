@@ -1,6 +1,8 @@
 #-----------------------------------------------------------------------------# Roads API
 const ROADS_BASE_URL = "https://roads.googleapis.com"
 
+# Shared wrapper for all Roads endpoints: pins base_url, disables client_id (Roads is key-only),
+# and wires up the Roads-specific error extractor.
 _roads_request(c::GoogleMapsClient, path::AbstractString; params) =
     _request(c, path; params,
              base_url = ROADS_BASE_URL,
@@ -47,10 +49,7 @@ function speed_limits(place_ids;
                       key::Union{Nothing,AbstractString} = nothing,
                       timeout::Union{Nothing,Real} = nothing)
     c = _client_from_kwargs(; client, key, timeout)
-    params = Pair{String,Any}[]
-    for pid in as_list(place_ids)
-        push!(params, "placeId" => pid)
-    end
+    params = Pair{String,Any}["placeId" => pid for pid in as_list(place_ids)]
     get(_roads_request(c, "/v1/speedLimits"; params), :speedLimits, [])
 end
 
@@ -70,6 +69,8 @@ function snapped_speed_limits(path;
     _roads_request(c, "/v1/speedLimits"; params)
 end
 
+# Body extractor for Roads endpoints — Roads puts errors under a top-level `error.status`
+# rather than the legacy Maps `status` envelope, so `_default_extract` doesn't apply.
 function _roads_extract(resp)
     body = try
         JSON3.read(resp.body)

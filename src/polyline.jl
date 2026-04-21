@@ -23,6 +23,7 @@ function encode_polyline(points)
     String(take!(io))
 end
 
+# Write one signed delta to `io` in Google's 5-bit chunked base-64 format.
 function _encode_delta(io::IO, d::Int)
     v = d < 0 ? ~(d << 1) : (d << 1)
     while v >= 0x20
@@ -55,6 +56,7 @@ function decode_polyline(s::AbstractString)
     points
 end
 
+# Read one signed delta from position `i` in `s`; returns `(delta, next_index)`.
 function _decode_value(s::AbstractString, i::Int)
     result::Int = 0
     shift::Int = 0
@@ -70,6 +72,8 @@ function _decode_value(s::AbstractString, i::Int)
 end
 
 #-----------------------------------------------------------------------------# shortest_path
+# Pick the shorter of pipe-joined coords or an `"enc:<polyline>"` string — lets Elevation callers
+# stay under the 2000-char URL limit on long paths.
 function shortest_path(locations)
     locs = locations isa Tuple{<:Real,<:Real} ? [locations] : locations
     encoded = "enc:" * encode_polyline(locs)

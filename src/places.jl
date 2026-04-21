@@ -1,4 +1,5 @@
 #-----------------------------------------------------------------------------# Places (legacy)
+# Valid prefixes for the `location_bias` parameter on `find_place`.
 const _PLACES_LOCATION_BIAS_PREFIXES = ("ipbias", "point", "circle", "rectangle")
 
 """
@@ -19,16 +20,16 @@ function find_place(input::AbstractString, input_type::AbstractString;
     end
     c = _client_from_kwargs(; client, key, timeout)
     params = Pair{String,Any}["input" => input, "inputtype" => input_type]
-    if fields !== nothing
+    if !isnothing(fields)
         push!(params, "fields" => join_list(",", fields))
     end
-    if location_bias !== nothing
+    if !isnothing(location_bias)
         prefix = split(location_bias, ":")[1]
         prefix in _PLACES_LOCATION_BIAS_PREFIXES ||
             throw(ArgumentError("location_bias must start with one of $(_PLACES_LOCATION_BIAS_PREFIXES)"))
         push!(params, "locationbias" => location_bias)
     end
-    language === nothing || push!(params, "language" => language)
+    isnothing(language) || push!(params, "language" => language)
     _request(c, "/maps/api/place/findplacefromtext/json"; params)
 end
 
@@ -74,12 +75,12 @@ function places_nearby(; location = nothing,
                          client::Union{Nothing,GoogleMapsClient} = nothing,
                          key::Union{Nothing,AbstractString} = nothing,
                          timeout::Union{Nothing,Real} = nothing)
-    location === nothing && page_token === nothing &&
+    isnothing(location) && isnothing(page_token) &&
         throw(ArgumentError("either `location` or `page_token` is required"))
     if rank_by == "distance"
-        (keyword !== nothing || name !== nothing || type !== nothing) ||
+        (!isnothing(keyword) || !isnothing(name) || !isnothing(type)) ||
             throw(ArgumentError("rank_by=\"distance\" requires `keyword`, `name`, or `type`"))
-        radius === nothing ||
+        isnothing(radius) ||
             throw(ArgumentError("`radius` cannot be set when rank_by=\"distance\""))
     end
     c = _client_from_kwargs(; client, key, timeout)
@@ -88,23 +89,25 @@ function places_nearby(; location = nothing,
                    keyword, name, rank_by, page_token)
 end
 
+# Shared body-builder for `places` (textsearch) and `places_nearby` (nearbysearch) — the two
+# endpoints share most parameters but differ in URL suffix and which kwargs they accept.
 function _places_search(c::GoogleMapsClient, url_part::AbstractString;
                         query, location, radius, language, min_price, max_price,
                         open_now, type, region, keyword, name, rank_by, page_token)
     params = Pair{String,Any}[]
-    query      === nothing || push!(params, "query"     => query)
-    location   === nothing || push!(params, "location"  => latlng(location))
-    radius     === nothing || push!(params, "radius"    => radius)
-    keyword    === nothing || push!(params, "keyword"   => keyword)
-    language   === nothing || push!(params, "language"  => language)
-    min_price  === nothing || push!(params, "minprice"  => min_price)
-    max_price  === nothing || push!(params, "maxprice"  => max_price)
-    name       === nothing || push!(params, "name"      => join_list(" ", name))
+    isnothing(query) || push!(params, "query"     => query)
+    isnothing(location) || push!(params, "location"  => latlng(location))
+    isnothing(radius) || push!(params, "radius"    => radius)
+    isnothing(keyword) || push!(params, "keyword"   => keyword)
+    isnothing(language) || push!(params, "language"  => language)
+    isnothing(min_price) || push!(params, "minprice"  => min_price)
+    isnothing(max_price) || push!(params, "maxprice"  => max_price)
+    isnothing(name) || push!(params, "name"      => join_list(" ", name))
     open_now             && push!(params, "opennow"   => "true")
-    rank_by    === nothing || push!(params, "rankby"    => rank_by)
-    type       === nothing || push!(params, "type"      => type)
-    region     === nothing || push!(params, "region"    => region)
-    page_token === nothing || push!(params, "pagetoken" => page_token)
+    isnothing(rank_by) || push!(params, "rankby"    => rank_by)
+    isnothing(type) || push!(params, "type"      => type)
+    isnothing(region) || push!(params, "region"    => region)
+    isnothing(page_token) || push!(params, "pagetoken" => page_token)
     _request(c, "/maps/api/place/$(url_part)search/json"; params)
 end
 
@@ -124,11 +127,11 @@ function place(place_id::AbstractString;
                timeout::Union{Nothing,Real} = nothing)
     c = _client_from_kwargs(; client, key, timeout)
     params = Pair{String,Any}["placeid" => place_id]
-    fields === nothing || push!(params, "fields" => join_list(",", fields))
-    language === nothing || push!(params, "language" => language)
-    session_token === nothing || push!(params, "sessiontoken" => session_token)
+    isnothing(fields) || push!(params, "fields" => join_list(",", fields))
+    isnothing(language) || push!(params, "language" => language)
+    isnothing(session_token) || push!(params, "sessiontoken" => session_token)
     reviews_no_translations && push!(params, "reviews_no_translations" => "true")
-    reviews_sort === nothing || push!(params, "reviews_sort" => reviews_sort)
+    isnothing(reviews_sort) || push!(params, "reviews_sort" => reviews_sort)
     _request(c, "/maps/api/place/details/json"; params)
 end
 
@@ -144,12 +147,12 @@ function places_photo(photo_reference::AbstractString;
                       client::Union{Nothing,GoogleMapsClient} = nothing,
                       key::Union{Nothing,AbstractString} = nothing,
                       timeout::Union{Nothing,Real} = nothing)
-    max_width === nothing && max_height === nothing &&
+    isnothing(max_width) && isnothing(max_height) &&
         throw(ArgumentError("at least one of `max_width` or `max_height` is required"))
     c = _client_from_kwargs(; client, key, timeout)
     params = Pair{String,Any}["photoreference" => photo_reference]
-    max_width  === nothing || push!(params, "maxwidth"  => max_width)
-    max_height === nothing || push!(params, "maxheight" => max_height)
+    isnothing(max_width) || push!(params, "maxwidth"  => max_width)
+    isnothing(max_height) || push!(params, "maxheight" => max_height)
     _request(c, "/maps/api/place/photo"; params, extract_body = _bytes_extract)
 end
 
@@ -191,18 +194,20 @@ function places_autocomplete_query(input_text::AbstractString;
                   components_=nothing, strict_bounds=false)
 end
 
+# Shared body-builder for `places_autocomplete` and `places_autocomplete_query` —
+# same URL pattern modulo `url_part` ("" vs "query") and a different kwarg subset.
 function _autocomplete(c::GoogleMapsClient, url_part::AbstractString;
                        input_text, session_token, offset, origin, location,
                        radius, language, types, components_, strict_bounds)
     params = Pair{String,Any}["input" => input_text]
-    session_token === nothing || push!(params, "sessiontoken" => session_token)
-    offset        === nothing || push!(params, "offset"       => offset)
-    origin        === nothing || push!(params, "origin"       => latlng(origin))
-    location      === nothing || push!(params, "location"     => latlng(location))
-    radius        === nothing || push!(params, "radius"       => radius)
-    language      === nothing || push!(params, "language"     => language)
-    types         === nothing || push!(params, "types"        => types)
-    if components_ !== nothing
+    isnothing(session_token) || push!(params, "sessiontoken" => session_token)
+    isnothing(offset) || push!(params, "offset"       => offset)
+    isnothing(origin) || push!(params, "origin"       => latlng(origin))
+    isnothing(location) || push!(params, "location"     => latlng(location))
+    isnothing(radius) || push!(params, "radius"       => radius)
+    isnothing(language) || push!(params, "language"     => language)
+    isnothing(types) || push!(params, "types"        => types)
+    if !isnothing(components_)
         if length(components_) != 1 || !(first(keys(components_)) in ("country", :country))
             throw(ArgumentError("autocomplete `components_` may only contain `country`"))
         end

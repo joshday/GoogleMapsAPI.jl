@@ -1,14 +1,17 @@
 using HTTP.URIs: escapeuri
 
+# Package version — used in the User-Agent header; falls back for unregistered dev versions.
 const _PKG_VERSION = try
     string(pkgversion(@__MODULE__))
 catch
     "0.1.0"
 end
+# Headers + retry config shared across all requests.
 const _USER_AGENT = "GoogleMapsAPI.jl/$(_PKG_VERSION)"
 const _EXPERIENCE_ID_HEADER = "X-Goog-Maps-Experience-ID"
 const _RETRIABLE_STATUSES = (500, 503, 504)
 
+# Default HTTP transport for `GoogleMapsClient.transport`; test stubs follow the same signature.
 _default_transport(method::Symbol, url::AbstractString;
                    headers, body, readtimeout, status_exception) =
     HTTP.request(String(method), url;
@@ -68,25 +71,27 @@ Base.@kwdef mutable struct GoogleMapsClient
     end
 end
 
+# Enforce credential / channel-format invariants on a client; called by the inner ctor and after per-call overrides.
 function _validate!(c::GoogleMapsClient)
-    if c.key === nothing && (c.client_id === nothing || c.client_secret === nothing)
+    if isnothing(c.key) && (isnothing(c.client_id) || isnothing(c.client_secret))
         throw(ArgumentError("GoogleMapsClient needs `key=` or `client_id=`+`client_secret=`."))
     end
-    if c.key !== nothing && !startswith(c.key, "AIza")
+    if !isnothing(c.key) && !startswith(c.key, "AIza")
         throw(ArgumentError("Invalid API key (expected 'AIza'-prefixed)."))
     end
-    if c.channel !== nothing && !occursin(r"^[A-Za-z0-9._-]*$", c.channel)
+    if !isnothing(c.channel) && !occursin(r"^[A-Za-z0-9._-]*$", c.channel)
         throw(ArgumentError("channel must match ^[A-Za-z0-9._-]*\$"))
     end
     c
 end
 
+# Effective rate cap: the tighter of queries_per_second and queries_per_minute/60, or `nothing` if both unset.
 function _queries_quota(c::GoogleMapsClient)
     qps = c.queries_per_second
     qpm = c.queries_per_minute
-    qps === nothing && qpm === nothing && return nothing
-    qps === nothing && return floor(Int, qpm / 60)
-    qpm === nothing && return Int(qps)
+    isnothing(qps) && isnothing(qpm) && return nothing
+    isnothing(qps) && return floor(Int, qpm / 60)
+    isnothing(qpm) && return Int(qps)
     floor(Int, min(Int(qps), qpm / 60))
 end
 
@@ -99,7 +104,7 @@ Set the `X-Goog-Maps-Experience-ID` header for subsequent calls. Pass a
 vector to send a comma-joined list. Pass `nothing` to clear.
 """
 function set_experience_id!(c::GoogleMapsClient, id::Union{Nothing,AbstractString})
-    c.experience_id = id === nothing ? nothing : String(id)
+    c.experience_id = isnothing(id) ? nothing : String(id)
     c
 end
 function set_experience_id!(c::GoogleMapsClient, ids::AbstractVector)
@@ -114,6 +119,7 @@ get_experience_id(c::GoogleMapsClient) = c.experience_id
 clear_experience_id!(c::GoogleMapsClient) = (c.experience_id = nothing; c)
 
 #-----------------------------------------------------------------------------# _urlencode_params
+# Build a URL query string from sorted pairs; expands vector values into repeated keys (e.g. placeId=a&placeId=b).
 function _urlencode_params(pairs::AbstractVector{<:Pair})
     parts = String[]
     for (k, v) in pairs
@@ -128,6 +134,7 @@ function _urlencode_params(pairs::AbstractVector{<:Pair})
     join(parts, "&")
 end
 
+# URL-encode a single key=value pair.
 _encode_pair(k, v) = "$(_fix_escape(escapeuri(string(k))))=$(_fix_escape(escapeuri(string(v))))"
 
 # Match Python's `urlencode(quote_plus)` + `unquote_unreserved` byte-for-byte:
@@ -135,27 +142,31 @@ _encode_pair(k, v) = "$(_fix_escape(escapeuri(string(k))))=$(_fix_escape(escapeu
 _fix_escape(s::AbstractString) = replace(s, "%20" => "+", "%7E" => "~")
 
 #-----------------------------------------------------------------------------# _generate_auth_url
+# Build the full path + query string, either appending `&signature=...` (enterprise) or `&key=...` (API key).
 function _generate_auth_url(c::GoogleMapsClient, path::AbstractString, params, accepts_clientid::Bool)
     sorted = _sorted_params(params)
-    if accepts_clientid && c.client_id !== nothing && c.client_secret !== nothing
-        c.channel === nothing || push!(sorted, "channel" => c.channel)
+    if accepts_clientid && !isnothing(c.client_id) && !isnothing(c.client_secret)
+        isnothing(c.channel) || push!(sorted, "channel" => c.channel)
         push!(sorted, "client" => c.client_id)
         qs = _urlencode_params(sorted)
         path_q = "$(path)?$(qs)"
         sig = sign_hmac(c.client_secret, path_q)
         return "$(path_q)&signature=$(sig)"
     end
-    if c.key !== nothing
+    if !isnothing(c.key)
         push!(sorted, "key" => c.key)
         return "$(path)?$(_urlencode_params(sorted))"
     end
     throw(ArgumentError("Endpoint requires an API key (does not accept enterprise credentials)."))
 end
 
+# Produce a fresh Pair vector sorted by key (MergeSort is stable, preserving caller order for duplicate keys).
 _sorted_params(d::AbstractDict) = sort!(Pair{String,Any}[string(k) => v for (k, v) in d]; by = first, alg = MergeSort)
 _sorted_params(v::AbstractVector{<:Pair}) = sort!(Pair{String,Any}[string(k) => val for (k, val) in v]; by = first, alg = MergeSort)
 
 #-----------------------------------------------------------------------------# _request
+# Core HTTP entry point: builds the authed URL, drives retries and QPS bookkeeping, and
+# dispatches to either a caller-supplied `extract_body` or `_default_extract`.
 function _request(
     c::GoogleMapsClient,
     path::AbstractString;
@@ -182,17 +193,17 @@ function _request(
     url = base_url * _build_path(c, path, params, auth, accepts_clientid)
 
     headers = Pair{String,String}["User-Agent" => _USER_AGENT]
-    c.experience_id === nothing || push!(headers, _EXPERIENCE_ID_HEADER => c.experience_id)
+    isnothing(c.experience_id) || push!(headers, _EXPERIENCE_ID_HEADER => c.experience_id)
     if auth === :header
-        c.key === nothing && throw(ArgumentError("auth=:header requires client.key"))
+        isnothing(c.key) && throw(ArgumentError("auth=:header requires client.key"))
         push!(headers, "X-Goog-Api-Key" => c.key)
     end
     for h in extra_headers
         push!(headers, string(first(h)) => string(last(h)))
     end
-    json_body === nothing || push!(headers, "Content-Type" => "application/json")
+    isnothing(json_body) || push!(headers, "Content-Type" => "application/json")
 
-    body_bytes = json_body === nothing ? UInt8[] : Vector{UInt8}(JSON3.write(json_body))
+    body_bytes = isnothing(json_body) ? UInt8[] : Vector{UInt8}(JSON3.write(json_body))
 
     resp = try
         c.transport(method, url;
@@ -217,7 +228,7 @@ function _request(
 
     _record_send!(c)
 
-    extractor = extract_body === nothing ? _default_extract : extract_body
+    extractor = something(extract_body, _default_extract)
     try
         return extractor(resp)
     catch e
@@ -236,8 +247,11 @@ function _request(
     end
 end
 
+# Body extractor for binary endpoints (static_map, places_photo) — returns the raw response bytes.
 _bytes_extract(resp) = Vector{UInt8}(resp.body)
 
+# Build the URL suffix (path + query) for a request, branching on auth mode:
+# `:query` uses `_generate_auth_url`; `:header` / `:none` omit credentials from the URL.
 function _build_path(c::GoogleMapsClient, path, params, auth::Symbol, accepts_clientid::Bool)
     if auth === :query
         return _generate_auth_url(c, path, params, accepts_clientid)
@@ -246,9 +260,11 @@ function _build_path(c::GoogleMapsClient, path, params, auth::Symbol, accepts_cl
     isempty(sorted) ? String(path) : "$(path)?$(_urlencode_params(sorted))"
 end
 
+# QPS bookkeeping: record this send in the rolling-window deque and, if we're at quota,
+# compute how long to sleep to stay under the per-second cap.
 function _record_send!(c::GoogleMapsClient)
     quota = _queries_quota(c)
-    quota === nothing && return
+    isnothing(quota) && return
     # Reserve a slot under the lock, then sleep outside so concurrent callers
     # don't serialize on each other's 1-second naps.
     wait_for = lock(c.lock) do
@@ -269,13 +285,15 @@ function _record_send!(c::GoogleMapsClient)
 end
 
 #-----------------------------------------------------------------------------# default body extractor
+# Default body handler for Maps-API endpoints that wrap results in a `status` envelope:
+# passes through `OK`/`ZERO_RESULTS`, raises `_OverQueryLimit` on throttling, `ApiError` otherwise.
 function _default_extract(resp)
     if resp.status != 200
         throw(HTTPError(resp.status))
     end
     body = JSON3.read(resp.body)
     status = _body_status(body)
-    status === nothing && return body
+    isnothing(status) && return body
     if status == "OK" || status == "ZERO_RESULTS"
         return body
     end
@@ -286,7 +304,9 @@ function _default_extract(resp)
     throw(ApiError(status, msg))
 end
 
+# Pull the `status` string from a response body, or `nothing` if the endpoint returns no envelope.
 _body_status(body) = haskey(body, :status) ? String(body.status) : nothing
+# Pull the `error_message` string from a response body, if present.
 _body_error_message(body) =
     haskey(body, :error_message) ? String(body.error_message) : nothing
 
@@ -296,25 +316,27 @@ _body_error_message(body) =
 _shallow_copy_client(c::GoogleMapsClient) =
     GoogleMapsClient(; (f => getfield(c, f) for f in fieldnames(GoogleMapsClient))...)
 
+# Resolve a `GoogleMapsClient` from flat-function kwargs: either the caller's `client=` (shallow-copied
+# if overrides are present), or a new client built from `key=`/`timeout=` (falling back to ENV for key).
 function _client_from_kwargs(;
     client::Union{Nothing,GoogleMapsClient} = nothing,
     key::Union{Nothing,AbstractString} = nothing,
     timeout::Union{Nothing,Real} = nothing,
     kwargs...,
 )
-    if client !== nothing
-        if key === nothing && timeout === nothing && isempty(kwargs)
+    if !isnothing(client)
+        if isnothing(key) && isnothing(timeout) && isempty(kwargs)
             return client
         end
         c = _shallow_copy_client(client)
-        key !== nothing     && (c.key = String(key))
-        timeout !== nothing && (c.timeout = timeout)
+        !isnothing(key)     && (c.key = String(key))
+        !isnothing(timeout) && (c.timeout = timeout)
         for (k, v) in kwargs
             setproperty!(c, k, v)
         end
         return _validate!(c)
     end
-    resolved_key = key === nothing ? get(ENV, "GOOGLE_MAPS_API_KEY", nothing) : String(key)
+    resolved_key = isnothing(key) ? get(ENV, "GOOGLE_MAPS_API_KEY", nothing) : String(key)
     GoogleMapsClient(; key = resolved_key,
                        timeout = something(timeout, 30),
                        kwargs...)

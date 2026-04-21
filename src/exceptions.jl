@@ -11,11 +11,11 @@ struct ApiError <: Exception
 end
 ApiError(status::AbstractString) = ApiError(String(status), nothing)
 ApiError(status::AbstractString, message) =
-    ApiError(String(status), message === nothing ? nothing : String(message))
+    ApiError(String(status), isnothing(message) ? nothing : String(message))
 
 function Base.showerror(io::IO, e::ApiError)
     print(io, "ApiError(", e.status)
-    e.message === nothing || print(io, ": ", e.message)
+    isnothing(e.message) || print(io, ": ", e.message)
     print(io, ")")
 end
 
@@ -29,7 +29,7 @@ struct TransportError <: Exception
     cause::Any
 end
 Base.showerror(io::IO, e::TransportError) =
-    print(io, "TransportError(", e.cause === nothing ? "unknown" : e.cause, ")")
+    print(io, "TransportError(", something(e.cause, "unknown"), ")")
 
 """
     HTTPError(status)
@@ -59,4 +59,4 @@ struct _OverQueryLimit <: Exception
 end
 _OverQueryLimit(status::AbstractString) = _OverQueryLimit(String(status), nothing)
 _OverQueryLimit(status::AbstractString, message) =
-    _OverQueryLimit(String(status), message === nothing ? nothing : String(message))
+    _OverQueryLimit(String(status), isnothing(message) ? nothing : String(message))

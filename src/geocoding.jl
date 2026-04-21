@@ -55,7 +55,7 @@ function reverse_geocode(
     timeout::Union{Nothing,Real} = nothing,
 )
     c = _client_from_kwargs(; client, key, timeout)
-    params = Pair{String,Any}["latlng" => "$(lat),$(lon)"]
+    params = Pair{String,Any}["latlng" => latlng((lat, lon))]
     isnothing(result_type)   || push!(params, "result_type"   => result_type)
     isnothing(location_type) || push!(params, "location_type" => location_type)
     isnothing(language)      || push!(params, "language"      => language)

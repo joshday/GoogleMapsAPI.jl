@@ -2,6 +2,7 @@ using SHA: hmac_sha1
 using Base64: base64encode, base64decode
 
 #-----------------------------------------------------------------------------# signing
+# URL-safe base64 helpers (stdlib `Base64` only ships standard-alphabet variants).
 _urlsafe_b64decode(s::AbstractString) = base64decode(replace(String(s), '-' => '+', '_' => '/'))
 _urlsafe_b64encode(b::AbstractVector{UInt8}) = replace(base64encode(b), '+' => '-', '/' => '_')
 

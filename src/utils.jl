@@ -39,6 +39,7 @@ waypoint(p::NamedTuple) = _latlng_waypoint(normalize_lat_lng(p)...)
 waypoint(s::AbstractString) = Dict{String,Any}("address" => String(s))
 waypoint(d::AbstractDict) = d
 
+# Build the `{ location: { latLng: {latitude, longitude} } }` Dict shape the Routes API expects.
 _latlng_waypoint(lat::Real, lon::Real) = Dict{String,Any}(
     "location" => Dict{String,Any}(
         "latLng" => Dict{String,Any}("latitude" => lat, "longitude" => lon),
