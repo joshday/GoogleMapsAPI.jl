@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>API – GoogleMapsAPI.jl</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/types.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3db6c18bb69885e7f25697a9383847b5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-81ce77b706570f28d16f9d87329af521.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "/"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "Search  (/)",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">GoogleMapsAPI.jl</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/joshday/GoogleMapsAPI.jl/stargazers"> <i class="bi bi-star" role="img">
+</i> 
+<span class="menu-text">Star</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/joshday/GoogleMapsAPI.jl"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/api.html">API</a></li><li class="breadcrumb-item"><a href="../pages/api.html"><span class="chapter-title">API</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Docs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">GoogleMapsAPI.jl</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/getting-started.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/plotting.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Plotting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/types.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Types &amp; extractors</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">API</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/api.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">API</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#types" id="toc-types" class="nav-link active" data-scroll-target="#types">Types</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/api.html">API</a></li><li class="breadcrumb-item"><a href="../pages/api.html"><span class="chapter-title">API</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">API</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="types" class="level2">
+<h2 class="anchored" data-anchor-id="types">Types</h2>
+<div class="card mb-3">
+<section id="apierror" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="apierror"><code>ApiError</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ApiError</span>(status, message<span class="op">=</span><span class="cn">nothing</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A Google Maps API call returned a non-success status in the response body (e.g.&nbsp;<code>"OVER_QUERY_LIMIT"</code>, <code>"INVALID_REQUEST"</code>).</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="gmfeature" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="gmfeature"><code>GMFeature</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GMFeature</span>(geometry, properties)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Geometry (a <code>GMPoint</code>, <code>GMLineString</code>, or <code>nothing</code>) paired with the raw response object that yielded it, so callers can still reach into fields like <code>name</code>, <code>place_id</code>, <code>formatted_address</code>, <code>elevation</code>, etc.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="gmfeaturecollection" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="gmfeaturecollection"><code>GMFeatureCollection</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GMFeatureCollection</span>(features)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Iterable collection of <a href="@ref"><code>GMFeature</code></a>s. Produced by <a href="@ref"><code>features</code></a>.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="gmlinestring" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="gmlinestring"><code>GMLineString</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GMLineString</span>(points)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An ordered sequence of <a href="@ref"><code>GMPoint</code></a>s — e.g.&nbsp;the decoded polyline of a route.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="gmpoint" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="gmpoint"><code>GMPoint</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GMPoint</span>(lat, lng)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A single lat/lng point extracted from a GoogleMapsAPI response.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="googlemapsclient" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="googlemapsclient"><code>GoogleMapsClient</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GoogleMapsClient</span>(; key, client_id, client_secret, <span class="op">...</span>) <span class="op">-&gt;</span> GoogleMapsClient</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Container for Google Maps Platform credentials and per-connection options. Primary use: pass to any flat-function call via <code>client = ...</code> instead of repeating <code>key=</code>, <code>timeout=</code>, etc.</p>
+<section id="keyword-arguments" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments">Keyword Arguments</h3>
+<ul>
+<li><code>key</code>: Maps API key (required unless <code>client_id</code> + <code>client_secret</code> set).</li>
+<li><code>client_id</code>, <code>client_secret</code>: enterprise Maps-for-Work credentials. <code>client_secret</code> must be the base64-URL-safe-encoded signing secret.</li>
+<li><code>channel</code>: enterprise tracking channel. Alphanumeric <code>._-</code> only.</li>
+<li><code>timeout</code>: read timeout per HTTP call (seconds, default 30).</li>
+<li><code>retry_timeout</code>: total time budget across retries (seconds, default 60).</li>
+<li><code>queries_per_second</code>, <code>queries_per_minute</code>: rate-limit caps; client sleeps to stay under the tighter of the two.</li>
+<li><code>retry_over_query_limit</code>: whether to retry on <code>OVER_QUERY_LIMIT</code> / Roads <code>RESOURCE_EXHAUSTED</code>. Default <code>true</code>.</li>
+<li><code>experience_id</code>: value for <code>X-Goog-Maps-Experience-ID</code> header.</li>
+<li><code>base_url</code>: default API host (<code>https://maps.googleapis.com</code>).</li>
+<li><code>transport</code>, <code>sleep</code>: runtime hooks, injectable for tests.</li>
+</ul>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="httperror" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="httperror"><code>HTTPError</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">HTTPError</span>(status)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An unexpected HTTP status was returned (non-200 on an endpoint that doesn’t wrap its errors in the API-status envelope).</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="requesttimeout" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="requesttimeout"><code>RequestTimeout</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RequestTimeout</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Total time across attempts exceeded <code>client.retry_timeout</code>.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="transporterror" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="transporterror"><code>TransportError</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TransportError</span>(cause)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Something went wrong while executing the HTTP request (DNS, connection reset, etc.). <code>cause</code> holds the underlying exception.</p>
+</div>
+</div>
+</section>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<div class="card mb-3">
+<section id="addressvalidation" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="addressvalidation"><code>addressvalidation</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">addressvalidation</span>(address_lines; region_code<span class="op">=</span><span class="cn">nothing</span>, locality<span class="op">=</span><span class="cn">nothing</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                  enable_usps_cass<span class="op">=</span><span class="cn">false</span>, <span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Validate a postal address. <code>address_lines</code> is a string (wrapped to a one-element vector) or a vector of address-line strings. <code>enable_usps_cass</code> is US/PR only.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="api_key" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="api_key"><code>api_key</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">api_key</span>() <span class="op">-&gt;</span> <span class="dt">String</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return the Google Maps API key from <code>ENV["GOOGLE_MAPS_API_KEY"]</code>. Throws if unset.</p>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>key <span class="op">=</span> GoogleMapsAPI.<span class="fu">api_key</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="clear_experience_id-clear_experience_id" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="clear_experience_id-clear_experience_id"><code>clear_experience_id!</code> {#clear_experience_id!}</h4>
+</section>
+<div class="card-body">
+<p><code>clear_experience_id!(client)</code> — clear the experience id.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="compute_route_matrix" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="compute_route_matrix"><code>compute_route_matrix</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_route_matrix</span>(origins, destinations; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.<span class="dt">Array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Call the Google Routes API <code>v2:computeRouteMatrix</code> endpoint.</p>
+<p><code>origins</code> and <code>destinations</code> are vectors of waypoints (accepted forms as for <a href="@ref"><code>waypoint</code></a>). Returns a flat array of matrix elements keyed by <code>originIndex</code> / <code>destinationIndex</code>.</p>
+<section id="keyword-arguments-1" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-1">Keyword Arguments</h3>
+<p>See <a href="@ref"><code>compute_routes</code></a>; supports <code>travel_mode</code>, <code>routing_preference</code>, <code>departure_time</code>, <code>arrival_time</code>, <code>traffic_model</code>, <code>language_code</code>, <code>region_code</code>, <code>units</code>, <code>field_mask</code>, <code>extra</code>, <code>client</code>, <code>key</code>, <code>timeout</code>.</p>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="compute_routes" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="compute_routes"><code>compute_routes</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_routes</span>(origin, destination; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Call the Google Routes API <code>v2:computeRoutes</code> endpoint.</p>
+<p><code>origin</code> and <code>destination</code> are converted with <a href="@ref"><code>waypoint</code></a> and may be <code>(lat, lon)</code> tuples, address strings, or waypoint <code>Dict</code>s (for <code>placeId</code>, etc.).</p>
+<section id="keyword-arguments-2" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-2">Keyword Arguments</h3>
+<ul>
+<li><code>travel_mode</code>: <code>"DRIVE"</code> (default), <code>"BICYCLE"</code>, <code>"WALK"</code>, <code>"TWO_WHEELER"</code>, <code>"TRANSIT"</code>.</li>
+<li><code>routing_preference</code>: <code>"TRAFFIC_AWARE"</code> (default), <code>"TRAFFIC_AWARE_OPTIMAL"</code>, <code>"TRAFFIC_UNAWARE"</code>.</li>
+<li><code>departure_time</code>: ISO 8601 timestamp (e.g.&nbsp;<code>"2026-04-27T08:00:00-04:00"</code>).</li>
+<li><code>arrival_time</code>: ISO 8601 timestamp (transit only).</li>
+<li><code>traffic_model</code>: <code>"BEST_GUESS"</code>, <code>"OPTIMISTIC"</code>, or <code>"PESSIMISTIC"</code>.</li>
+<li><code>intermediates</code>: vector of waypoints visited between origin and destination.</li>
+<li><code>compute_alternative_routes::Bool = false</code>.</li>
+<li><code>units</code>: <code>"METRIC"</code> or <code>"IMPERIAL"</code>.</li>
+<li><code>language_code</code>, <code>region_code</code>: IETF BCP-47 / CLDR codes.</li>
+<li><code>field_mask</code>: comma-separated response field mask (default covers duration, staticDuration, distanceMeters, and encodedPolyline).</li>
+<li><code>extra::AbstractDict</code>: merged into the request body as a last step — use for advanced options such as <code>"routeModifiers"</code>, <code>"extraComputations"</code>, etc.</li>
+<li><code>client::GoogleMapsClient</code>: optional; see <a href="@ref"><code>GoogleMapsClient</code></a>.</li>
+<li><code>key</code>: API key (default <a href="@ref"><code>api_key()</code></a>).</li>
+<li><code>timeout</code>: read timeout in seconds (default 30).</li>
+</ul>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="decode_polyline" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="decode_polyline"><code>decode_polyline</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">decode_polyline</span>(s) <span class="op">-&gt;</span> <span class="dt">Vector</span>{<span class="dt">NamedTuple</span>{(<span class="op">:</span>lat, <span class="op">:</span>lng), <span class="dt">Tuple</span>{<span class="dt">Float64</span>, <span class="dt">Float64</span>}}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Decode a Google-Maps polyline string into a vector of <code>(lat, lng)</code> named tuples.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="elevation" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="elevation"><code>elevation</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">elevation</span>(locations; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.<span class="dt">Array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Provides elevation data for <code>locations</code>, a single location or a list of lat/lng values (tuples, named tuples, dicts).</p>
+<section id="keyword-arguments-3" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-3">Keyword Arguments</h3>
+<ul>
+<li><code>client::GoogleMapsClient</code>: optional.</li>
+<li><code>key</code>, <code>timeout</code>: shortcut kwargs as for <a href="@ref"><code>compute_routes</code></a>.</li>
+</ul>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="elevation_along_path" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="elevation_along_path"><code>elevation_along_path</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">elevation_along_path</span>(path, samples; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.<span class="dt">Array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Provides elevation data sampled along <code>path</code>. <code>path</code> may be an encoded polyline string (prepended with <code>"enc:"</code> internally) or a list of lat/lng values. <code>samples</code> is the number of sample points.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="encode_polyline" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="encode_polyline"><code>encode_polyline</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">encode_polyline</span>(points) <span class="op">-&gt;</span> <span class="dt">String</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Encode a list of lat/lng points into a Google-Maps polyline string. Each point may be a <code>(lat, lng)</code> tuple, a <code>NamedTuple</code>, or an <code>AbstractDict</code>.</p>
+<p>See https://developers.google.com/maps/documentation/utilities/polylinealgorithm</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="features" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="features"><code>features</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">features</span>(x) <span class="op">-&gt;</span> GMFeatureCollection</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Normalise any GoogleMapsAPI response into a <a href="@ref"><code>GMFeatureCollection</code></a>. Handles the usual <code>results</code> / <code>routes</code> / <code>candidates</code> / <code>predictions</code> / <code>snappedPoints</code> wrappers, plus single-feature responses (<code>geolocate</code>, <code>place</code> → <code>result</code>) and raw arrays (<code>elevation</code>, <code>snap_to_roads</code>).</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="find_place" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="find_place"><code>find_place</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find_place</span>(input, input_type; fields<span class="op">=</span><span class="cn">nothing</span>, location_bias<span class="op">=</span><span class="cn">nothing</span>, language<span class="op">=</span><span class="cn">nothing</span>, kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Find a place by text input. <code>input_type</code> must be <code>"textquery"</code> or <code>"phonenumber"</code>.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="geocode" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="geocode"><code>geocode</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geocode</span>(address; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Forward-geocode <code>address</code> via the Google Geocoding API.</p>
+<section id="keyword-arguments-4" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-4">Keyword Arguments</h3>
+<ul>
+<li><code>components</code>: component filter string (e.g.&nbsp;<code>"country:US|postal_code:94043"</code>).</li>
+<li><code>bounds</code>: viewport bias, <code>"lat1,lng1|lat2,lng2"</code>.</li>
+<li><code>language</code>, <code>region</code>: IETF BCP-47 / CLDR codes.</li>
+<li><code>extra::AbstractDict</code>: additional query parameters.</li>
+<li><code>client::GoogleMapsClient</code>: optional; see <a href="@ref"><code>GoogleMapsClient</code></a>.</li>
+<li><code>key</code>: API key (default <a href="@ref"><code>api_key()</code></a>).</li>
+<li><code>timeout</code>: read timeout in seconds (default 30).</li>
+</ul>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="geolocate" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="geolocate"><code>geolocate</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geolocate</span>(; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Locate a device from cell-tower / WiFi data. POST to <code>https://www.googleapis.com/geolocation/v1/geolocate</code>.</p>
+<section id="keyword-arguments-5" class="level3">
+<h3 class="anchored" data-anchor-id="keyword-arguments-5">Keyword Arguments</h3>
+<ul>
+<li><code>home_mobile_country_code</code>, <code>home_mobile_network_code</code>: strings.</li>
+<li><code>radio_type</code>: <code>"lte"</code>, <code>"gsm"</code>, <code>"cdma"</code>, or <code>"wcdma"</code>.</li>
+<li><code>carrier</code>: carrier name.</li>
+<li><code>consider_ip</code>: <code>Bool</code> — fall back to IP geolocation.</li>
+<li><code>cell_towers</code>: vector of cell tower dicts.</li>
+<li><code>wifi_access_points</code>: vector of WiFi AP dicts.</li>
+<li><code>client</code>, <code>key</code>, <code>timeout</code>: standard shortcuts.</li>
+</ul>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="geometries" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="geometries"><code>geometries</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geometries</span>(x) <span class="op">-&gt;</span> <span class="dt">Vector</span>{<span class="dt">Union</span>{GMPoint, GMLineString}}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All non-missing geometries (flattened) from the response.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="get_experience_id" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="get_experience_id"><code>get_experience_id</code></h4>
+</section>
+<div class="card-body">
+<p><code>get_experience_id(client)</code> — current experience id or <code>nothing</code>.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="linestrings" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="linestrings"><code>linestrings</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">linestrings</span>(x) <span class="op">-&gt;</span> <span class="dt">Vector</span>{GMLineString}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All <a href="@ref"><code>GMLineString</code></a> geometries from the response.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="mapplot" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="mapplot"><code>mapplot</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mapplot</span>(x; maptype<span class="op">=</span><span class="st">"roadmap"</span>, size<span class="op">=</span>(<span class="fl">640</span>, <span class="fl">640</span>), kwargs<span class="op">...</span>) <span class="op">-&gt;</span> Makie.Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot any GoogleMapsAPI response: fetches a Static Maps background sized to the input’s bounding box, then overlays markers for every lat/lng point found and lines for every <code>encodedPolyline</code>. Accepts any of: <code>geocode</code>, <code>reverse_geocode</code>, <code>compute_routes</code>, <code>compute_route_matrix</code>, <code>elevation</code>, <code>geolocate</code>, <code>snap_to_roads</code>, <code>nearest_roads</code>, <code>places</code>, <code>places_nearby</code>, <code>find_place</code>, <code>place</code>, or any <code>JSON.Object</code> containing one of the recognised shapes.</p>
+<p>Method bodies live in the Makie package extension — call sites require <code>using Makie</code> (plus a backend like GLMakie or CairoMakie).</p>
+<p>Extra <code>kwargs</code> are forwarded to <a href="@ref"><code>static_map</code></a> (e.g.&nbsp;<code>scale=2</code>, <code>language="en"</code>, <code>key=...</code>, <code>client=...</code>) except for the plot-styling kwargs <code>markercolor</code>, <code>markersize</code>, <code>linecolor</code>, <code>linewidth</code>, <code>padding</code>.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="nearest_roads" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="nearest_roads"><code>nearest_roads</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nearest_roads</span>(points; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Closest road segment for each of up to 100 independent coordinates.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="parse_duration" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="parse_duration"><code>parse_duration</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">parse_duration</span>(s) <span class="op">-&gt;</span> <span class="dt">Float64</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Parse a Google duration string (e.g.&nbsp;<code>"16087s"</code>, <code>"16087.5s"</code>) into seconds. Returns <code>Float64</code> seconds. Returns <code>NaN</code> for <code>nothing</code>/<code>missing</code>.</p>
+<section id="examples-1" class="level3">
+<h3 class="anchored" data-anchor-id="examples-1">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">parse_duration</span>(<span class="st">"16087s"</span>)     <span class="co"># 16087.0</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">parse_duration</span>(<span class="st">"0.5s"</span>)       <span class="co"># 0.5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</div>
+<div class="card mb-3">
+<section id="place" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="place"><code>place</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">place</span>(place_id; fields<span class="op">=</span><span class="cn">nothing</span>, language<span class="op">=</span><span class="cn">nothing</span>, <span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Detailed info for a single place by place_id.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="places" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="places"><code>places</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">places</span>(; query<span class="op">=</span><span class="cn">nothing</span>, location<span class="op">=</span><span class="cn">nothing</span>, radius<span class="op">=</span><span class="cn">nothing</span>, <span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Text-search for places.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="places_autocomplete" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="places_autocomplete"><code>places_autocomplete</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">places_autocomplete</span>(input_text; <span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span> (predictions)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="card mb-3">
+<section id="places_autocomplete_query" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="places_autocomplete_query"><code>places_autocomplete_query</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">places_autocomplete_query</span>(input_text; <span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span> (predictions)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="card mb-3">
+<section id="places_nearby" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="places_nearby"><code>places_nearby</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">places_nearby</span>(; location<span class="op">=</span><span class="cn">nothing</span>, radius<span class="op">=</span><span class="cn">nothing</span>, <span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Nearby-search for places. Either <code>location</code> or <code>page_token</code> is required.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="places_photo" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="places_photo"><code>places_photo</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">places_photo</span>(photo_reference; max_width<span class="op">=</span><span class="cn">nothing</span>, max_height<span class="op">=</span><span class="cn">nothing</span>, <span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span>{<span class="dt">UInt8</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Download a place photo’s raw bytes. At least one of <code>max_width</code>/<code>max_height</code> is required.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="points" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="points"><code>points</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(x) <span class="op">-&gt;</span> <span class="dt">Vector</span>{GMPoint}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>All <a href="@ref"><code>GMPoint</code></a> geometries from the response, walking into line strings.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="reverse_geocode" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="reverse_geocode"><code>reverse_geocode</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">reverse_geocode</span>(lat, lon; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reverse_geocode</span>((lat, lon); kwargs<span class="op">...</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reverse-geocode a coordinate via the Google Geocoding API.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="set_experience_id-set_experience_id" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="set_experience_id-set_experience_id"><code>set_experience_id!</code> {#set_experience_id!}</h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_experience_id!</span>(client, id) <span class="op">-&gt;</span> client</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set_experience_id!</span>(client, ids<span class="op">::</span><span class="dt">AbstractVector</span>) <span class="op">-&gt;</span> client</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Set the <code>X-Goog-Maps-Experience-ID</code> header for subsequent calls. Pass a vector to send a comma-joined list. Pass <code>nothing</code> to clear.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="snap_to_roads" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="snap_to_roads"><code>snap_to_roads</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">snap_to_roads</span>(path; interpolate<span class="op">=</span><span class="cn">false</span>, kwargs<span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span> (JSON array)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Snap a GPS path (up to 100 points) to the most likely roads travelled.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="snapped_speed_limits" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="snapped_speed_limits"><code>snapped_speed_limits</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">snapped_speed_limits</span>(path; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Snap <code>path</code> to roads and return the matched road segments with speed limits. Unlike <code>speed_limits</code>, returns the full body (both <code>speedLimits</code> and <code>snappedPoints</code>).</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="speed_limits" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="speed_limits"><code>speed_limits</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">speed_limits</span>(place_ids; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Posted speed limits (km/h) for up to 100 road-segment place IDs. <code>place_ids</code> is a string or vector of strings.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="static_map" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="static_map"><code>static_map</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">static_map</span>(size; kwargs<span class="op">...</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span>{<span class="dt">UInt8</span>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Download a static map image. <code>size</code> is an int (square) or <code>(width, height)</code>. Either <code>markers</code> must be provided OR both <code>center</code> and <code>zoom</code> must be set.</p>
+<p><code>markers</code> / <code>path</code> / <code>visible</code> / <code>style</code> accept either a pre-joined string or a vector of pipe-joinable parts. See the Google Static Maps docs for the full list of supported options.</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="timezone" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="timezone"><code>timezone</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timezone</span>(location; timestamp<span class="op">=</span><span class="cn">nothing</span>, language<span class="op">=</span><span class="cn">nothing</span>, kwargs<span class="op">...</span>) <span class="op">-&gt;</span> JSON.Object</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get time-zone and UTC-offset info for <code>location</code> at <code>timestamp</code>. <code>location</code> may be any form accepted by the <code>convert.latlng</code> helper. <code>timestamp</code> may be an integer unix time, a <code>DateTime</code>, or a string (default is the current unix time).</p>
+</div>
+</div>
+<div class="card mb-3">
+<section id="waypoint" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="waypoint"><code>waypoint</code></h4>
+</section>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">waypoint</span>(x) <span class="op">-&gt;</span> <span class="dt">Dict</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Convert <code>x</code> to a Routes API waypoint <code>Dict</code>.</p>
+<p>Accepted inputs:</p>
+<ul>
+<li><code>(lat, lon)</code> <code>Tuple</code> or <code>NamedTuple</code> with <code>:lat</code>/<code>:lon</code> (or <code>:latitude</code>/<code>:longitude</code>) → <code>latLng</code> waypoint</li>
+<li><code>AbstractString</code> → <code>address</code> waypoint</li>
+<li><code>AbstractDict</code> → returned as-is (escape hatch for <code>placeId</code>, <code>polyline</code>, etc.)</li>
+</ul>
+<section id="examples-2" class="level3">
+<h3 class="anchored" data-anchor-id="examples-2">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">waypoint</span>((<span class="fl">35.9132</span>, <span class="op">-</span><span class="fl">79.0822</span>))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">waypoint</span>(<span class="st">"1600 Amphitheatre Pkwy, Mountain View, CA"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">waypoint</span>(<span class="fu">Dict</span>(<span class="st">"placeId"</span> <span class="op">=&gt;</span> <span class="st">"ChIJj61dQgK6j4AR4GeTYWZsKWw"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../pages/types.html" class="pagination-link" aria-label="Types &amp; extractors">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Types &amp; extractors</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Built on 2026-04-21</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>
+(function() {
+    // Injected per-version by .github/workflows/Docs.yml at deploy time.
+    // Local preview: placeholders aren't substituted; fall back to sensible defaults.
+    var CURRENT_VERSION = "dev";
+    var BASE_PATH = "/GoogleMapsAPI.jl/";
+    if (CURRENT_VERSION.indexOf("__") === 0) {
+        CURRENT_VERSION = "dev";
+        BASE_PATH = "/";
+    }
+
+    function buildDropdown(versions) {
+        var navbar = document.querySelector('.navbar-nav.navbar-nav-scroll.ms-auto');
+        if (!navbar) return;
+
+        var li = document.createElement('li');
+        li.className = 'nav-item dropdown';
+        li.innerHTML =
+            '<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">' +
+                CURRENT_VERSION +
+            '</a>' +
+            '<ul class="dropdown-menu dropdown-menu-end"></ul>';
+
+        var menu = li.querySelector('.dropdown-menu');
+
+        ['stable', 'dev'].forEach(function(v) {
+            var a = document.createElement('a');
+            a.className = 'dropdown-item' + (v === CURRENT_VERSION ? ' active' : '');
+            a.href = BASE_PATH + v + '/';
+            a.textContent = v;
+            var item = document.createElement('li');
+            item.appendChild(a);
+            menu.appendChild(item);
+        });
+
+        if (versions && versions.length > 0) {
+            var divider = document.createElement('li');
+            divider.innerHTML = '<hr class="dropdown-divider">';
+            menu.appendChild(divider);
+
+            versions.forEach(function(v) {
+                var a = document.createElement('a');
+                a.className = 'dropdown-item' + (v === CURRENT_VERSION ? ' active' : '');
+                a.href = BASE_PATH + v + '/';
+                a.textContent = v;
+                var item = document.createElement('li');
+                item.appendChild(a);
+                menu.appendChild(item);
+            });
+        }
+
+        navbar.prepend(li);
+
+        if (versions && versions.length > 0 && CURRENT_VERSION !== 'stable' && CURRENT_VERSION !== 'dev') {
+            var latest = versions[0];
+            if (CURRENT_VERSION !== latest) {
+                var banner = document.createElement('div');
+                banner.className = 'alert alert-warning text-center mb-0 rounded-0';
+                banner.setAttribute('role', 'alert');
+                banner.innerHTML = 'You are viewing docs for <strong>' + CURRENT_VERSION + '</strong>. ' +
+                    'The latest stable release is <a href="' + BASE_PATH + 'stable/" class="alert-link">' + latest + '</a>.';
+                document.body.prepend(banner);
+            }
+        }
+    }
+
+    fetch(BASE_PATH + 'versions.json')
+        .then(function(res) { return res.ok ? res.json() : []; })
+        .catch(function() { return []; })
+        .then(buildDropdown);
+
+    var titleLink = document.querySelector('a.navbar-brand:not(.navbar-brand-logo)');
+    if (titleLink) {
+        titleLink.href = BASE_PATH + CURRENT_VERSION + '/';
+    }
+
+    var starLink = document.querySelector('a.nav-link[href*="/stargazers"]');
+    if (starLink) {
+        var match = starLink.href.match(/github\.com\/([^/]+\/[^/]+)\/stargazers/);
+        if (match) {
+            var img = document.createElement('img');
+            img.src = 'https://img.shields.io/github/stars/' + match[1] + '?style=social';
+            img.alt = 'GitHub stars';
+            img.style.verticalAlign = 'middle';
+            starLink.replaceChildren(img);
+        }
+    }
+})();
+</script>
+
+
+
+
+</body></html>

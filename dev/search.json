@@ -1,0 +1,255 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "GoogleMapsAPI.jl",
+    "section": "",
+    "text": "What’s covered\nA Julia wrapper for the Google Maps Platform web APIs with feature parity to the official googlemaps Python client — plus typed wrapper outputs that play nicely with GeoInterface.jl and a Makie plotting extension.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>GoogleMapsAPI.jl</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#whats-covered",
+    "href": "index.html#whats-covered",
+    "title": "GoogleMapsAPI.jl",
+    "section": "",
+    "text": "Routes API — compute_routes, compute_route_matrix\nGeocoding API — geocode, reverse_geocode\nElevation API — elevation, elevation_along_path\nGeolocation API — geolocate\nTime Zone API — timezone\nRoads API — snap_to_roads, nearest_roads, speed_limits, snapped_speed_limits\nPlaces API (legacy) — find_place, places, places_nearby, place, places_photo, places_autocomplete, places_autocomplete_query\nMaps Static API — static_map\nAddress Validation API — addressvalidation\nPolyline utilities — encode_polyline, decode_polyline\nTyped wrappers — GMPoint, GMLineString, GMFeature, GMFeatureCollection with GeoInterface trait conformance\nmapplot — Static-Maps background + scatter/line overlay for any response (via the Makie extension)",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>GoogleMapsAPI.jl</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#client-infrastructure",
+    "href": "index.html#client-infrastructure",
+    "title": "GoogleMapsAPI.jl",
+    "section": "Client infrastructure",
+    "text": "Client infrastructure\nMirrors the Python client: retry with jittered backoff on 5xx / OVER_QUERY_LIMIT, QPS/QPM rate limiting, HMAC-SHA1 URL signing for enterprise client_id / client_secret credentials, and the X-Goog-Maps-Experience-ID header.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>GoogleMapsAPI.jl</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#next-steps",
+    "href": "index.html#next-steps",
+    "title": "GoogleMapsAPI.jl",
+    "section": "Next steps",
+    "text": "Next steps\n\nGetting started — install, authenticate, make a first call.\nPlotting — mapplot, plus GeoInterface/GeoMakie integration.\nTypes — GMPoint, GMLineString, GMFeature, GMFeatureCollection, and the extractor functions that normalise any response.\nAPI — every exported name with its docstring.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>GoogleMapsAPI.jl</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html",
+    "href": "pages/getting-started.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "Install",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#install",
+    "href": "pages/getting-started.html#install",
+    "title": "Getting started",
+    "section": "",
+    "text": "using Pkg\nPkg.add(url = \"https://github.com/joshday/GoogleMapsAPI.jl\")",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#authenticate",
+    "href": "pages/getting-started.html#authenticate",
+    "title": "Getting started",
+    "section": "Authenticate",
+    "text": "Authenticate\nEvery function reads ENV[\"GOOGLE_MAPS_API_KEY\"] by default. Export it in your shell:\nexport GOOGLE_MAPS_API_KEY=\"your-key-here\"\nOr pass key = \"...\" (or a preconfigured client = GoogleMapsClient(...)) to any call.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#first-call",
+    "href": "pages/getting-started.html#first-call",
+    "title": "Getting started",
+    "section": "First call",
+    "text": "First call\nusing GoogleMapsAPI\n\nr = geocode(\"1600 Amphitheatre Pkwy, Mountain View, CA\")\nr.results[1].geometry.location   # (lat = ..., lng = ...)\n\nroute = compute_routes(\n    (35.9132, -79.0822),            # Carrboro, NC\n    (38.9805, -77.0915);            # Bethesda, MD\n    routing_preference = \"TRAFFIC_AWARE_OPTIMAL\",\n    departure_time     = \"2026-04-27T08:00:00-04:00\",\n)\nparse_duration(route.routes[1].duration)   # seconds\nroute.routes[1].distanceMeters             # meters",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#reuse-a-client",
+    "href": "pages/getting-started.html#reuse-a-client",
+    "title": "Getting started",
+    "section": "Reuse a client",
+    "text": "Reuse a client\nFor longer-running scripts, construct a GoogleMapsClient once so that retry / rate-limit state is shared across calls:\nc = GoogleMapsClient(\n    key                    = ENV[\"GOOGLE_MAPS_API_KEY\"],\n    timeout                = 30,\n    retry_timeout          = 60,\n    queries_per_second     = 60,\n    queries_per_minute     = 6000,\n    retry_over_query_limit = true,\n    experience_id          = \"my-analytics-id\",\n)\n\ngeocode(\"1600 Amphitheatre Pkwy, Mountain View, CA\"; client = c)\nelevation((27.9881, 86.9250); client = c)\nPer-call overrides (key=, timeout=) do not mutate the shared client; they share the rate-limit state.\nEnterprise signing uses client_id + client_secret:\nc = GoogleMapsClient(\n    client_id     = \"gme-myorg\",\n    client_secret = \"vNIXE0xscrmjlyV-12Nj_BvUPaw=\",\n)",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#exceptions",
+    "href": "pages/getting-started.html#exceptions",
+    "title": "Getting started",
+    "section": "Exceptions",
+    "text": "Exceptions\n\nApiError(status, message) — non-OK status in the response envelope (e.g. \"OVER_QUERY_LIMIT\", \"REQUEST_DENIED\").\nHTTPError(status) — unexpected HTTP status on endpoints without an envelope.\nTransportError(cause) — network / DNS / unexpected exception.\nRequestTimeout() — total elapsed time exceeded client.retry_timeout.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/getting-started.html#where-to-next",
+    "href": "pages/getting-started.html#where-to-next",
+    "title": "Getting started",
+    "section": "Where to next",
+    "text": "Where to next\n\nPlotting — mapplot, and using any response directly with GeoInterface or GeoMakie.\nTypes — features(response) turns any response into a normalised iterable of GMFeatures.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting started</span>"
+    ]
+  },
+  {
+    "objectID": "pages/plotting.html",
+    "href": "pages/plotting.html",
+    "title": "Plotting",
+    "section": "",
+    "text": "The built-in mapplot\nGoogleMapsAPI.jl ships two plotting paths:\nLoad Makie (plus a backend and FileIO) alongside GoogleMapsAPI, and mapplot(x) will fetch a static map sized to the response’s bounding box and overlay everything it can extract.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Plotting</span>"
+    ]
+  },
+  {
+    "objectID": "pages/plotting.html#the-built-in-mapplot",
+    "href": "pages/plotting.html#the-built-in-mapplot",
+    "title": "Plotting",
+    "section": "",
+    "text": "using GoogleMapsAPI\nusing CairoMakie, FileIO, Makie\n\nr = geocode(\"1600 Amphitheatre Pkwy, Mountain View, CA\")\nmapplot(r)\n\nroute = compute_routes(\n    (35.9132, -79.0822), (38.9805, -77.0915);\n    routing_preference = \"TRAFFIC_AWARE_OPTIMAL\",\n)\nmapplot(route; maptype = \"satellite\", size = (800, 600))\n\nelevations = elevation([(38.5, -120.2), (40.7, -120.95), (43.25, -126.45)])\nmapplot(elevations)\n\nStyling kwargs\n\n\n\n\n\n\n\n\nKwarg\nDefault\nPurpose\n\n\n\n\nmaptype\n\"roadmap\"\n\"roadmap\", \"satellite\", \"terrain\", \"hybrid\"\n\n\nsize\n(640, 640)\nImage pixel dimensions\n\n\npadding\n0.15\nFraction of bbox span added as margin\n\n\nmarkercolor\n:red\nScatter colour for points\n\n\nmarkersize\n12\nScatter size\n\n\nlinecolor\n:dodgerblue\nPolyline colour\n\n\nlinewidth\n3\nPolyline width\n\n\n\nEverything else — scale, language, region, style, client, key, timeout, etc. — is forwarded to static_map.\n\n\nHow it works\nInternally, mapplot:\n\nCalls features(x) → extracts every GMPoint and GMLineString.\nComputes a bounding box and a Web-Mercator-fit zoom level.\nFetches the Static Maps image via static_map(...) and decodes the PNG bytes with FileIO.\nDraws the image, then scatters markers and draws polylines at their projected pixel coordinates — so overlays line up with the real map.\n\nBecause it goes through features(x), any response type works — even a raw JSON.Object you built yourself.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Plotting</span>"
+    ]
+  },
+  {
+    "objectID": "pages/plotting.html#geointerface-use-responses-anywhere",
+    "href": "pages/plotting.html#geointerface-use-responses-anywhere",
+    "title": "Plotting",
+    "section": "GeoInterface: use responses anywhere",
+    "text": "GeoInterface: use responses anywhere\nThe real integration happens one level up. The four wrapper types (GMPoint, GMLineString, GMFeature, GMFeatureCollection) implement the GeoInterface traits, so every GeoInterface-aware package sees them as native geometries.\n\nTraits\nusing GoogleMapsAPI, GeoInterface\n\np = GMPoint(37.4, -122.1)\nGeoInterface.isgeometry(p)        # true\nGeoInterface.geomtrait(p)         # PointTrait()\nGeoInterface.x(p)                 # -122.1  (longitude, GeoInterface convention)\nGeoInterface.y(p)                 # 37.4    (latitude)\nGeoInterface.ncoord(p)            # 2\nls = GMLineString([GMPoint(0.0, 0.0), GMPoint(1.0, 2.0), GMPoint(3.0, 4.0)])\nGeoInterface.geomtrait(ls)        # LineStringTrait()\nGeoInterface.ngeom(ls)            # 3\nGeoInterface.getgeom(ls, 2)       # GMPoint(1.0, 2.0)\nfc = features(geocode(\"...\"))\nGeoInterface.isfeaturecollection(fc)           # true\nf  = GeoInterface.getfeature(fc, 1)\nGeoInterface.geometry(f)                       # GMPoint(...)\nGeoInterface.properties(f).formatted_address   # \"...\"\n\n\nWhat this unlocks\nAnything in the JuliaGeo ecosystem that accepts GeoInterface geometries now accepts GoogleMapsAPI responses — including:\n\nGeoMakie.jl — geographic plotting with map projections (see the next section).\nGeoJSON.jl — serialise a feature collection to GeoJSON.\nArchGDAL.jl — reproject, transform, or export to shapefile/GeoPackage/etc.\nGeometryOps.jl — distance, area, simplification, clipping.\nShapefile.jl, Tables.jl-backed workflows, etc.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Plotting</span>"
+    ]
+  },
+  {
+    "objectID": "pages/plotting.html#geomakie-integration",
+    "href": "pages/plotting.html#geomakie-integration",
+    "title": "Plotting",
+    "section": "GeoMakie integration",
+    "text": "GeoMakie integration\nGeoMakie plots lat/lng data on a GeoAxis that handles projections. Because GMPoint implements PointTrait, you can pull points out of any response and hand them straight to Makie — and with a small shim, hand the wrappers themselves to GeoMakie.\n\nScatter: extract points, plot directly\nusing GoogleMapsAPI, GeoMakie, GLMakie\n\nfig = Figure(size = (900, 600))\nax = GeoAxis(fig[1, 1]; dest = \"+proj=natearth\")\n\n# Any call that returns points — geocode, places_nearby, snap_to_roads, …\nr  = places(\"coffee\"; location = (37.7749, -122.4194), radius = 2000)\npts = points(r)\nlons = [GeoInterface.x(p) for p in pts]\nlats = [GeoInterface.y(p) for p in pts]\n\nscatter!(ax, lons, lats; color = :red, markersize = 10)\n\nsave(\"coffee.png\", fig)\n\n\nRoutes: lines on a projected axis\nusing GoogleMapsAPI, GeoMakie, GLMakie, GeoInterface\n\nfig = Figure(size = (900, 600))\nax  = GeoAxis(fig[1, 1]; dest = \"+proj=wintri\")\n\nroute = compute_routes(\n    (35.9132, -79.0822),            # Carrboro, NC\n    (38.9805, -77.0915);            # Bethesda, MD\n)\n\nfor ls in linestrings(route)\n    lons = [GeoInterface.x(pt) for pt in ls]\n    lats = [GeoInterface.y(pt) for pt in ls]\n    lines!(ax, lons, lats; color = :dodgerblue, linewidth = 3)\nend\n\nsave(\"route.png\", fig)\n\n\nOne function for anything\nIf you want to treat a response generically — plotting every point or every line without caring about the endpoint — walk the feature collection:\nfunction geoplot!(ax, x)\n    for f in features(x)\n        g = GeoInterface.geometry(f)\n        if g isa GMPoint\n            scatter!(ax, [GeoInterface.x(g)], [GeoInterface.y(g)])\n        elseif g isa GMLineString\n            lons = [GeoInterface.x(pt) for pt in g]\n            lats = [GeoInterface.y(pt) for pt in g]\n            lines!(ax, lons, lats)\n        end\n    end\n    ax\nend\n\nfig = Figure()\nax  = GeoAxis(fig[1, 1]; dest = \"+proj=natearth\")\ngeoplot!(ax, geocode(\"San Francisco, CA\"))\ngeoplot!(ax, compute_routes((37.77, -122.42), (40.71, -74.01)))\ngeoplot!(ax, elevation([(40, -120), (42, -122), (44, -124)]))\nfig\n\n\nWhen to use what\n\n\n\n\n\n\n\nGoal\nUse\n\n\n\n\nQuick look at a response on a real base map\nmapplot(x)\n\n\nPublication-quality projection / custom styling\nGeoMakie + wrappers\n\n\nHand data to another geospatial tool (GeoJSON, GDAL, …)\nfeatures(x) or points(x) / linestrings(x)\n\n\n\nmapplot is great for exploration; GeoMakie + GeoInterface is the right path when you want to compose with other layers, apply a projection, or integrate a response into a larger visualisation.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Plotting</span>"
+    ]
+  },
+  {
+    "objectID": "pages/types.html",
+    "href": "pages/types.html",
+    "title": "Types & extractors",
+    "section": "",
+    "text": "The wrapper types\nEvery GoogleMapsAPI response is a raw JSON object (JSON.Object) — great for exploratory access via dot notation, but awkward to hand to the wider geospatial ecosystem.\nGoogleMapsAPI.jl ships four lightweight wrapper types plus a set of extractor functions that normalise any response shape into the same structure.\nusing GoogleMapsAPI\n\n\nPrecompiling packages...\n   2015.2 ms  ✓ QuartoNotebookWorkerJSONExt (serial)\n  1 dependency successfully precompiled in 2 seconds",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
+    ]
+  },
+  {
+    "objectID": "pages/types.html#the-wrapper-types",
+    "href": "pages/types.html#the-wrapper-types",
+    "title": "Types & extractors",
+    "section": "",
+    "text": "GMPoint\nA single lat/lng pair.\n\np = GMPoint(37.4, -122.1)\n\nGMPoint(lat=37.4, lng=-122.1)\n\n\n\n\nGMLineString\nAn ordered sequence of GMPoints — produced whenever a response carries an encoded polyline (e.g. a route from compute_routes).\n\nls = GMLineString([GMPoint(0.0, 0.0), GMPoint(1.0, 2.0), GMPoint(3.0, 4.0)])\nlength(ls), collect(ls)\n\n(3, GMPoint[GMPoint(lat=0.0, lng=0.0), GMPoint(lat=1.0, lng=2.0), GMPoint(lat=3.0, lng=4.0)])\n\n\n\n\nGMFeature\nGeometry (a GMPoint, GMLineString, or nothing) paired with the raw response object that yielded it — so you keep access to fields like formatted_address, placeId, name, elevation, duration, etc.\n\nf = GMFeature(p, (; formatted_address = \"Mountain View, CA\"))\nf.geometry, f.properties\n\n(GMPoint(lat=37.4, lng=-122.1), (formatted_address = \"Mountain View, CA\",))\n\n\n\n\nGMFeatureCollection\nIterable container of GMFeatures with length, indexing, and iteration.\n\nfc = GMFeatureCollection([f, GMFeature(nothing, (; note = \"no geometry\"))])\nlength(fc), fc[1].geometry\n\n(2, GMPoint(lat=37.4, lng=-122.1))",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
+    ]
+  },
+  {
+    "objectID": "pages/types.html#featuresresponse-normalise-any-response",
+    "href": "pages/types.html#featuresresponse-normalise-any-response",
+    "title": "Types & extractors",
+    "section": "features(response) — normalise any response",
+    "text": "features(response) — normalise any response\nfeatures walks any GoogleMapsAPI return value and produces a GMFeatureCollection. It handles:\n\ngeocode / reverse_geocode — results[i].geometry.location → points.\ncompute_routes — routes[i].polyline.encodedPolyline → linestrings.\nplaces, places_nearby, find_place — results/candidates[i].geometry.location.\nplace — single result.geometry.location.\nplaces_autocomplete — predictions (no geometry, just properties).\nelevation, snap_to_roads, nearest_roads — bare arrays of {location, …} objects.\ngeolocate — single {location, accuracy}.\nAny object with an unrecognised shape is wrapped as a single-feature collection with nothing geometry and the raw object as properties.\n\n\nusing JSON\n\n# Synthetic geocode-shaped response for illustration\nr = JSON.parse(\"\"\"\n{\n    \"status\":\"OK\",\n    \"results\":[\n        {\"geometry\":{\"location\":{\"lat\":37.4,\"lng\":-122.1}},\"formatted_address\":\"A\"},\n        {\"geometry\":{\"location\":{\"lat\":40.0,\"lng\":-74.0}},\"formatted_address\":\"B\"}\n    ]\n}\n\"\"\")\n\nfc = features(r)\n\nGMFeatureCollection(2 features)\n\n\n\nfc[1].geometry\n\nGMPoint(lat=37.4, lng=-122.1)\n\n\n\nfc[1].properties.formatted_address\n\n\"A\"",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
+    ]
+  },
+  {
+    "objectID": "pages/types.html#convenience-extractors",
+    "href": "pages/types.html#convenience-extractors",
+    "title": "Types & extractors",
+    "section": "Convenience extractors",
+    "text": "Convenience extractors\nFor the common cases you don’t need the full feature wrapper — just the points or the polylines.\n\npoints(r)\n\n2-element Vector{GMPoint}:\n GMPoint(lat=37.4, lng=-122.1)\n GMPoint(lat=40.0, lng=-74.0)\n\n\n\nroute = JSON.parse(\"\"\"{\"routes\":[{\"polyline\":{\"encodedPolyline\":\"_p~iF~ps|U_ulLnnqC_mqNvxq`@\"}}]}\"\"\")\nlinestrings(route)\n\n1-element Vector{GMLineString}:\n GMLineString(3 points)\n\n\n\ngeometries(r)\n\n2-element Vector{GMPoint}:\n GMPoint(lat=37.4, lng=-122.1)\n GMPoint(lat=40.0, lng=-74.0)",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
+    ]
+  },
+  {
+    "objectID": "pages/types.html#why-wrappers",
+    "href": "pages/types.html#why-wrappers",
+    "title": "Types & extractors",
+    "section": "Why wrappers?",
+    "text": "Why wrappers?\nThree reasons:\n\nType stability. GMPoint is a concrete struct — accessing p.lat costs nothing. Walking into a JSON.Object hits dynamic dispatch.\nGeoInterface. These wrapper types implement GeoInterface.jl traits, so any GeoInterface-aware package (GeoMakie, GeoJSON, ArchGDAL, Shapefile, GeometryOps, …) can consume GoogleMapsAPI responses directly. See Plotting.\nNormalisation. features(x) lets downstream code iterate uniformly without branching on which endpoint produced x.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Types & extractors</span>"
+    ]
+  },
+  {
+    "objectID": "pages/api.html",
+    "href": "pages/api.html",
+    "title": "API",
+    "section": "",
+    "text": "Types",
+    "crumbs": [
+      "API",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>API</span>"
+    ]
+  },
+  {
+    "objectID": "pages/api.html#types",
+    "href": "pages/api.html#types",
+    "title": "API",
+    "section": "",
+    "text": "ApiError\n\n\nApiError(status, message=nothing)\nA Google Maps API call returned a non-success status in the response body (e.g. \"OVER_QUERY_LIMIT\", \"INVALID_REQUEST\").\n\n\n\n\nGMFeature\n\n\nGMFeature(geometry, properties)\nGeometry (a GMPoint, GMLineString, or nothing) paired with the raw response object that yielded it, so callers can still reach into fields like name, place_id, formatted_address, elevation, etc.\n\n\n\n\nGMFeatureCollection\n\n\nGMFeatureCollection(features)\nIterable collection of GMFeatures. Produced by features.\n\n\n\n\nGMLineString\n\n\nGMLineString(points)\nAn ordered sequence of GMPoints — e.g. the decoded polyline of a route.\n\n\n\n\nGMPoint\n\n\nGMPoint(lat, lng)\nA single lat/lng point extracted from a GoogleMapsAPI response.\n\n\n\n\nGoogleMapsClient\n\n\nGoogleMapsClient(; key, client_id, client_secret, ...) -&gt; GoogleMapsClient\nContainer for Google Maps Platform credentials and per-connection options. Primary use: pass to any flat-function call via client = ... instead of repeating key=, timeout=, etc.\n\nKeyword Arguments\n\nkey: Maps API key (required unless client_id + client_secret set).\nclient_id, client_secret: enterprise Maps-for-Work credentials. client_secret must be the base64-URL-safe-encoded signing secret.\nchannel: enterprise tracking channel. Alphanumeric ._- only.\ntimeout: read timeout per HTTP call (seconds, default 30).\nretry_timeout: total time budget across retries (seconds, default 60).\nqueries_per_second, queries_per_minute: rate-limit caps; client sleeps to stay under the tighter of the two.\nretry_over_query_limit: whether to retry on OVER_QUERY_LIMIT / Roads RESOURCE_EXHAUSTED. Default true.\nexperience_id: value for X-Goog-Maps-Experience-ID header.\nbase_url: default API host (https://maps.googleapis.com).\ntransport, sleep: runtime hooks, injectable for tests.\n\n\n\n\n\n\nHTTPError\n\n\nHTTPError(status)\nAn unexpected HTTP status was returned (non-200 on an endpoint that doesn’t wrap its errors in the API-status envelope).\n\n\n\n\nRequestTimeout\n\n\nRequestTimeout()\nTotal time across attempts exceeded client.retry_timeout.\n\n\n\n\nTransportError\n\n\nTransportError(cause)\nSomething went wrong while executing the HTTP request (DNS, connection reset, etc.). cause holds the underlying exception.",
+    "crumbs": [
+      "API",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>API</span>"
+    ]
+  },
+  {
+    "objectID": "pages/api.html#functions",
+    "href": "pages/api.html#functions",
+    "title": "API",
+    "section": "Functions",
+    "text": "Functions\n\n\naddressvalidation\n\n\naddressvalidation(address_lines; region_code=nothing, locality=nothing,\n                  enable_usps_cass=false, ...) -&gt; JSON.Object\nValidate a postal address. address_lines is a string (wrapped to a one-element vector) or a vector of address-line strings. enable_usps_cass is US/PR only.\n\n\n\n\napi_key\n\n\napi_key() -&gt; String\nReturn the Google Maps API key from ENV[\"GOOGLE_MAPS_API_KEY\"]. Throws if unset.\n\nExamples\nkey = GoogleMapsAPI.api_key()\n\n\n\n\n\nclear_experience_id! {#clear_experience_id!}\n\n\nclear_experience_id!(client) — clear the experience id.\n\n\n\n\ncompute_route_matrix\n\n\ncompute_route_matrix(origins, destinations; kwargs...) -&gt; JSON.Array\nCall the Google Routes API v2:computeRouteMatrix endpoint.\norigins and destinations are vectors of waypoints (accepted forms as for waypoint). Returns a flat array of matrix elements keyed by originIndex / destinationIndex.\n\nKeyword Arguments\nSee compute_routes; supports travel_mode, routing_preference, departure_time, arrival_time, traffic_model, language_code, region_code, units, field_mask, extra, client, key, timeout.\n\n\n\n\n\ncompute_routes\n\n\ncompute_routes(origin, destination; kwargs...) -&gt; JSON.Object\nCall the Google Routes API v2:computeRoutes endpoint.\norigin and destination are converted with waypoint and may be (lat, lon) tuples, address strings, or waypoint Dicts (for placeId, etc.).\n\nKeyword Arguments\n\ntravel_mode: \"DRIVE\" (default), \"BICYCLE\", \"WALK\", \"TWO_WHEELER\", \"TRANSIT\".\nrouting_preference: \"TRAFFIC_AWARE\" (default), \"TRAFFIC_AWARE_OPTIMAL\", \"TRAFFIC_UNAWARE\".\ndeparture_time: ISO 8601 timestamp (e.g. \"2026-04-27T08:00:00-04:00\").\narrival_time: ISO 8601 timestamp (transit only).\ntraffic_model: \"BEST_GUESS\", \"OPTIMISTIC\", or \"PESSIMISTIC\".\nintermediates: vector of waypoints visited between origin and destination.\ncompute_alternative_routes::Bool = false.\nunits: \"METRIC\" or \"IMPERIAL\".\nlanguage_code, region_code: IETF BCP-47 / CLDR codes.\nfield_mask: comma-separated response field mask (default covers duration, staticDuration, distanceMeters, and encodedPolyline).\nextra::AbstractDict: merged into the request body as a last step — use for advanced options such as \"routeModifiers\", \"extraComputations\", etc.\nclient::GoogleMapsClient: optional; see GoogleMapsClient.\nkey: API key (default api_key()).\ntimeout: read timeout in seconds (default 30).\n\n\n\n\n\n\ndecode_polyline\n\n\ndecode_polyline(s) -&gt; Vector{NamedTuple{(:lat, :lng), Tuple{Float64, Float64}}}\nDecode a Google-Maps polyline string into a vector of (lat, lng) named tuples.\n\n\n\n\nelevation\n\n\nelevation(locations; kwargs...) -&gt; JSON.Array\nProvides elevation data for locations, a single location or a list of lat/lng values (tuples, named tuples, dicts).\n\nKeyword Arguments\n\nclient::GoogleMapsClient: optional.\nkey, timeout: shortcut kwargs as for compute_routes.\n\n\n\n\n\n\nelevation_along_path\n\n\nelevation_along_path(path, samples; kwargs...) -&gt; JSON.Array\nProvides elevation data sampled along path. path may be an encoded polyline string (prepended with \"enc:\" internally) or a list of lat/lng values. samples is the number of sample points.\n\n\n\n\nencode_polyline\n\n\nencode_polyline(points) -&gt; String\nEncode a list of lat/lng points into a Google-Maps polyline string. Each point may be a (lat, lng) tuple, a NamedTuple, or an AbstractDict.\nSee https://developers.google.com/maps/documentation/utilities/polylinealgorithm\n\n\n\n\nfeatures\n\n\nfeatures(x) -&gt; GMFeatureCollection\nNormalise any GoogleMapsAPI response into a GMFeatureCollection. Handles the usual results / routes / candidates / predictions / snappedPoints wrappers, plus single-feature responses (geolocate, place → result) and raw arrays (elevation, snap_to_roads).\n\n\n\n\nfind_place\n\n\nfind_place(input, input_type; fields=nothing, location_bias=nothing, language=nothing, kwargs...) -&gt; JSON.Object\nFind a place by text input. input_type must be \"textquery\" or \"phonenumber\".\n\n\n\n\ngeocode\n\n\ngeocode(address; kwargs...) -&gt; JSON.Object\nForward-geocode address via the Google Geocoding API.\n\nKeyword Arguments\n\ncomponents: component filter string (e.g. \"country:US|postal_code:94043\").\nbounds: viewport bias, \"lat1,lng1|lat2,lng2\".\nlanguage, region: IETF BCP-47 / CLDR codes.\nextra::AbstractDict: additional query parameters.\nclient::GoogleMapsClient: optional; see GoogleMapsClient.\nkey: API key (default api_key()).\ntimeout: read timeout in seconds (default 30).\n\n\n\n\n\n\ngeolocate\n\n\ngeolocate(; kwargs...) -&gt; JSON.Object\nLocate a device from cell-tower / WiFi data. POST to https://www.googleapis.com/geolocation/v1/geolocate.\n\nKeyword Arguments\n\nhome_mobile_country_code, home_mobile_network_code: strings.\nradio_type: \"lte\", \"gsm\", \"cdma\", or \"wcdma\".\ncarrier: carrier name.\nconsider_ip: Bool — fall back to IP geolocation.\ncell_towers: vector of cell tower dicts.\nwifi_access_points: vector of WiFi AP dicts.\nclient, key, timeout: standard shortcuts.\n\n\n\n\n\n\ngeometries\n\n\ngeometries(x) -&gt; Vector{Union{GMPoint, GMLineString}}\nAll non-missing geometries (flattened) from the response.\n\n\n\n\nget_experience_id\n\n\nget_experience_id(client) — current experience id or nothing.\n\n\n\n\nlinestrings\n\n\nlinestrings(x) -&gt; Vector{GMLineString}\nAll GMLineString geometries from the response.\n\n\n\n\nmapplot\n\n\nmapplot(x; maptype=\"roadmap\", size=(640, 640), kwargs...) -&gt; Makie.Figure\nPlot any GoogleMapsAPI response: fetches a Static Maps background sized to the input’s bounding box, then overlays markers for every lat/lng point found and lines for every encodedPolyline. Accepts any of: geocode, reverse_geocode, compute_routes, compute_route_matrix, elevation, geolocate, snap_to_roads, nearest_roads, places, places_nearby, find_place, place, or any JSON.Object containing one of the recognised shapes.\nMethod bodies live in the Makie package extension — call sites require using Makie (plus a backend like GLMakie or CairoMakie).\nExtra kwargs are forwarded to static_map (e.g. scale=2, language=\"en\", key=..., client=...) except for the plot-styling kwargs markercolor, markersize, linecolor, linewidth, padding.\n\n\n\n\nnearest_roads\n\n\nnearest_roads(points; kwargs...) -&gt; Vector\nClosest road segment for each of up to 100 independent coordinates.\n\n\n\n\nparse_duration\n\n\nparse_duration(s) -&gt; Float64\nParse a Google duration string (e.g. \"16087s\", \"16087.5s\") into seconds. Returns Float64 seconds. Returns NaN for nothing/missing.\n\nExamples\nparse_duration(\"16087s\")     # 16087.0\nparse_duration(\"0.5s\")       # 0.5\n\n\n\n\n\nplace\n\n\nplace(place_id; fields=nothing, language=nothing, ...) -&gt; JSON.Object\nDetailed info for a single place by place_id.\n\n\n\n\nplaces\n\n\nplaces(; query=nothing, location=nothing, radius=nothing, ...) -&gt; JSON.Object\nText-search for places.\n\n\n\n\nplaces_autocomplete\n\n\nplaces_autocomplete(input_text; ...) -&gt; Vector (predictions)\n\n\n\n\nplaces_autocomplete_query\n\n\nplaces_autocomplete_query(input_text; ...) -&gt; Vector (predictions)\n\n\n\n\nplaces_nearby\n\n\nplaces_nearby(; location=nothing, radius=nothing, ...) -&gt; JSON.Object\nNearby-search for places. Either location or page_token is required.\n\n\n\n\nplaces_photo\n\n\nplaces_photo(photo_reference; max_width=nothing, max_height=nothing, ...) -&gt; Vector{UInt8}\nDownload a place photo’s raw bytes. At least one of max_width/max_height is required.\n\n\n\n\npoints\n\n\npoints(x) -&gt; Vector{GMPoint}\nAll GMPoint geometries from the response, walking into line strings.\n\n\n\n\nreverse_geocode\n\n\nreverse_geocode(lat, lon; kwargs...) -&gt; JSON.Object\nreverse_geocode((lat, lon); kwargs...)\nReverse-geocode a coordinate via the Google Geocoding API.\n\n\n\n\nset_experience_id! {#set_experience_id!}\n\n\nset_experience_id!(client, id) -&gt; client\nset_experience_id!(client, ids::AbstractVector) -&gt; client\nSet the X-Goog-Maps-Experience-ID header for subsequent calls. Pass a vector to send a comma-joined list. Pass nothing to clear.\n\n\n\n\nsnap_to_roads\n\n\nsnap_to_roads(path; interpolate=false, kwargs...) -&gt; Vector (JSON array)\nSnap a GPS path (up to 100 points) to the most likely roads travelled.\n\n\n\n\nsnapped_speed_limits\n\n\nsnapped_speed_limits(path; kwargs...) -&gt; JSON.Object\nSnap path to roads and return the matched road segments with speed limits. Unlike speed_limits, returns the full body (both speedLimits and snappedPoints).\n\n\n\n\nspeed_limits\n\n\nspeed_limits(place_ids; kwargs...) -&gt; Vector\nPosted speed limits (km/h) for up to 100 road-segment place IDs. place_ids is a string or vector of strings.\n\n\n\n\nstatic_map\n\n\nstatic_map(size; kwargs...) -&gt; Vector{UInt8}\nDownload a static map image. size is an int (square) or (width, height). Either markers must be provided OR both center and zoom must be set.\nmarkers / path / visible / style accept either a pre-joined string or a vector of pipe-joinable parts. See the Google Static Maps docs for the full list of supported options.\n\n\n\n\ntimezone\n\n\ntimezone(location; timestamp=nothing, language=nothing, kwargs...) -&gt; JSON.Object\nGet time-zone and UTC-offset info for location at timestamp. location may be any form accepted by the convert.latlng helper. timestamp may be an integer unix time, a DateTime, or a string (default is the current unix time).\n\n\n\n\nwaypoint\n\n\nwaypoint(x) -&gt; Dict\nConvert x to a Routes API waypoint Dict.\nAccepted inputs:\n\n(lat, lon) Tuple or NamedTuple with :lat/:lon (or :latitude/:longitude) → latLng waypoint\nAbstractString → address waypoint\nAbstractDict → returned as-is (escape hatch for placeId, polyline, etc.)\n\n\nExamples\nwaypoint((35.9132, -79.0822))\nwaypoint(\"1600 Amphitheatre Pkwy, Mountain View, CA\")\nwaypoint(Dict(\"placeId\" =&gt; \"ChIJj61dQgK6j4AR4GeTYWZsKWw\"))",
+    "crumbs": [
+      "API",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>API</span>"
+    ]
+  }
+]
